@@ -1,0 +1,15 @@
+.stagger-enter {
+  animation: fade-up 0.75s ease forwards;
+}
+
+.glass-panel {
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 999px;
+  filter: blur(20px);
+  opacity: 0.7;
+}

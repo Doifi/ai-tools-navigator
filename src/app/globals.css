@@ -1,0 +1,127 @@
+@import "../styles/animations.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-sans: "Avenir Next", "Segoe UI", "PingFang SC", sans-serif;
+  --font-display: "Trebuchet MS", "Avenir Next", "PingFang SC", sans-serif;
+  --color-background: 244 247 252;
+  --color-foreground: 21 28 45;
+  --color-muted: 107 118 142;
+  --color-panel: 255 255 255;
+  --color-line: 216 223 236;
+  --color-brand: 58 110 255;
+  --color-brand-strong: 32 84 222;
+  --color-brand-soft: 130 188 255;
+  --color-accent-coral: 255 123 94;
+  --color-accent-mint: 77 203 173;
+  --color-accent-gold: 255 189 79;
+  --color-success: 40 161 105;
+  --color-warning: 210 118 38;
+}
+
+* {
+  border-color: rgb(var(--color-line) / 0.72);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(58, 110, 255, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(255, 123, 94, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(244, 247, 252, 1));
+  color: rgb(var(--color-foreground));
+  font-family: var(--font-sans);
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: rgba(58, 110, 255, 0.18);
+}
+
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    letter-spacing: -0.03em;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+@layer components {
+  .page-shell {
+    @apply relative overflow-x-hidden;
+  }
+
+  .surface-panel {
+    @apply rounded-[1.75rem] border border-line/70 shadow-soft;
+    background-color: rgb(255 255 255 / 0.85);
+  }
+
+  .eyebrow {
+    @apply text-sm font-semibold uppercase tracking-[0.24em] text-brand;
+  }
+
+  .section-grid {
+    @apply grid gap-5 md:grid-cols-2 xl:grid-cols-3;
+  }
+
+  .article-content {
+    @apply rounded-[1.75rem] border border-line/70 p-6 shadow-soft sm:p-8;
+    background-color: rgb(255 255 255 / 0.88);
+  }
+
+  .article-content h2 {
+    @apply mt-10 font-display text-2xl font-semibold text-foreground first:mt-0;
+  }
+
+  .article-content p {
+    @apply mt-4 text-base leading-8;
+    color: rgb(var(--color-foreground) / 0.72);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .mask-fade-bottom {
+    mask-image: linear-gradient(to bottom, black 82%, transparent 100%);
+  }
+
+  .slider-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(58, 110, 255, 0.35) transparent;
+  }
+
+  .slider-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  .slider-scrollbar::-webkit-scrollbar-track {
+    background: rgba(216, 223, 236, 0.35);
+    border-radius: 999px;
+  }
+
+  .slider-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(58, 110, 255, 0.35);
+    border-radius: 999px;
+  }
+
+  .slider-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: rgba(58, 110, 255, 0.52);
+  }
+}
