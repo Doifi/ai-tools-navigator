@@ -16,7 +16,7 @@ export type Database = {
           icon: string | null;
           id: string;
           name: string;
-          order: number | null;
+          sort_order: number | null;
           slug: string;
         };
         Insert: {
@@ -25,7 +25,7 @@ export type Database = {
           icon?: string | null;
           id?: string;
           name: string;
-          order?: number | null;
+          sort_order?: number | null;
           slug: string;
         };
         Update: {
@@ -34,7 +34,7 @@ export type Database = {
           icon?: string | null;
           id?: string;
           name?: string;
-          order?: number | null;
+          sort_order?: number | null;
           slug?: string;
         };
         Relationships: [];

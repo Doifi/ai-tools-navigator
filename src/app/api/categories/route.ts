@@ -25,7 +25,7 @@ export async function GET() {
     const { data, error } = await supabase
       .from("categories")
       .select("*, tools:tools(count)")
-      .order("order", { ascending: true })
+      .order("sort_order", { ascending: true })
       .order("created_at", { ascending: true });
 
     if (error) {

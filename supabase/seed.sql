@@ -1,4 +1,4 @@
-insert into public.categories (name, slug, description, icon, "order") values
+insert into public.categories (name, slug, description, icon, sort_order) values
   ('AI绘画', 'ai-drawing', 'AI图像生成和编辑工具', 'Palette', 1),
   ('AI文案', 'ai-writing', 'AI写作和内容创作工具', 'Pen', 2),
   ('AI视频', 'ai-video', 'AI视频生成和编辑工具', 'Video', 3),

@@ -16,7 +16,7 @@ export default async function AdminToolsPage() {
         .from("tools")
         .select("*, categories(id, name, slug)")
         .order("created_at", { ascending: false }),
-      supabase.from("categories").select("id, name, slug").order("order", { ascending: true })
+      supabase.from("categories").select("id, name, slug").order("sort_order", { ascending: true })
     ]);
 
   if (toolsError) {

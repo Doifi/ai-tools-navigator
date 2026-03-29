@@ -1,21 +1,44 @@
 create extension if not exists pgcrypto;
 
-create type public.price_model as enum ('free', 'freemium', 'paid');
-create type public.content_status as enum ('draft', 'published', 'archived');
-create type public.submission_status as enum ('pending', 'approved', 'rejected');
-create type public.sponsor_plan as enum ('starter', 'featured', 'homepage');
+do $$
+begin
+  create type public.price_model as enum ('free', 'freemium', 'paid');
+exception
+  when duplicate_object then null;
+end $$;
 
-create table public.categories (
+do $$
+begin
+  create type public.content_status as enum ('draft', 'published', 'archived');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  create type public.submission_status as enum ('pending', 'approved', 'rejected');
+exception
+  when duplicate_object then null;
+end $$;
+
+do $$
+begin
+  create type public.sponsor_plan as enum ('starter', 'featured', 'homepage');
+exception
+  when duplicate_object then null;
+end $$;
+
+create table if not exists public.categories (
   id uuid default gen_random_uuid() primary key,
   name varchar(100) not null,
   slug varchar(100) unique not null,
   description text,
   icon varchar(50),
-  "order" integer default 0,
+  sort_order integer default 0,
   created_at timestamp with time zone default now()
 );
 
-create table public.tools (
+create table if not exists public.tools (
   id uuid default gen_random_uuid() primary key,
   name varchar(200) not null,
   slug varchar(200) unique not null,
@@ -39,7 +62,7 @@ create table public.tools (
   published_at timestamp with time zone default now()
 );
 
-create table public.posts (
+create table if not exists public.posts (
   id uuid default gen_random_uuid() primary key,
   title varchar(200) not null,
   slug varchar(200) unique not null,
@@ -55,7 +78,7 @@ create table public.posts (
   created_at timestamp with time zone default now()
 );
 
-create table public.tool_submissions (
+create table if not exists public.tool_submissions (
   id uuid default gen_random_uuid() primary key,
   tool_name varchar(200) not null,
   website_url text not null,
@@ -106,6 +129,8 @@ begin
   where id = tool_id;
 end;
 $$;
+
+drop trigger if exists tools_set_updated_at on public.tools;
 
 create trigger tools_set_updated_at
 before update on public.tools
