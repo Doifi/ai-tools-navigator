@@ -9,3 +9,5 @@ dist
 .vercel-deploy-temp
 .env.local
 .env.*.local
+
+.vercel
