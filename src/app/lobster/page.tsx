@@ -50,7 +50,7 @@ export default function LobsterPage() {
                 rel={hasDownloadUrl ? "noreferrer" : undefined}
                 className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
               >
-                {hasDownloadUrl ? "立即下载安装包" : "查看安装包说明"}
+                {hasDownloadUrl ? "查看官方安装入口" : "查看安装包说明"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -113,7 +113,7 @@ export default function LobsterPage() {
               className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-white px-6 text-sm font-semibold text-foreground transition hover:bg-white/92"
             >
               <Download className="h-4 w-4" />
-              {hasDownloadUrl ? "下载安装包" : "当前先看安装教程"}
+              {hasDownloadUrl ? "打开官方安装页" : "当前先看安装教程"}
             </Link>
             <Link
               href="/lobster#usage-guide"
@@ -140,6 +140,33 @@ export default function LobsterPage() {
             ))}
           </div>
         </Card>
+      </section>
+
+      <section className="space-y-6">
+        <div>
+          <p className="eyebrow">Official Links</p>
+          <h2 className="mt-3 font-display text-3xl font-semibold text-foreground sm:text-4xl">
+            官方安装与使用链接
+          </h2>
+        </div>
+
+        <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {lobsterZone.officialLinks.map((linkItem) => (
+            <Card key={linkItem.href} className="space-y-4">
+              <h3 className="font-display text-2xl font-semibold text-foreground">{linkItem.label}</h3>
+              <p className="text-sm leading-7 text-foreground/66">{linkItem.description}</p>
+              <Link
+                href={linkItem.href}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 text-sm font-semibold text-brand transition hover:text-brand-strong"
+              >
+                打开链接
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Card>
+          ))}
+        </div>
       </section>
 
       <section id="install-guide" className="space-y-6">

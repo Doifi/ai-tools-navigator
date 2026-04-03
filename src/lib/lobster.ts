@@ -13,6 +13,12 @@ export interface LobsterUsageModule {
   bullets: string[];
 }
 
+export interface LobsterOfficialLink {
+  label: string;
+  href: string;
+  description: string;
+}
+
 export const lobsterTutorialPosts = {
   install: {
     title: "OpenClaw（龙虾）安装教程：从下载安装到首次启动",
@@ -32,19 +38,51 @@ export const lobsterZone = {
   description:
     "避免资料散落在聊天记录和网盘里，这里统一收纳 OpenClaw（龙虾）的下载入口、首次安装步骤和日常使用方法。",
   package: {
-    name: "OpenClaw（龙虾）桌面端安装包",
-    version: "最新版入口已预留",
+    name: "OpenClaw（龙虾）官方安装入口",
+    version: "官方文档 / 脚本 / 源码",
     platform: "Windows / macOS",
     updatedAt: "2026-04-03",
-    downloadUrl: "",
+    downloadUrl: "https://openclawdoc.com/docs/getting-started/installation/",
     description:
-      "这里预留 OpenClaw（龙虾）安装包的统一下载入口。拿到正式下载地址后，只需补上链接即可直接对外使用。",
+      "这里直接使用 OpenClaw 官方安装文档作为主入口，同时补充 Windows、Linux / macOS 脚本和官方 GitHub 仓库，避免站内再放失效占位链接。",
     notes: [
-      "优先使用最新版安装包，避免旧版残留配置带来冲突。",
-      "首次安装前建议先阅读下方安装教程，按步骤完成环境准备。",
-      "如需补充历史版本、离线包说明，可继续通过后台文章管理维护。"
+      "优先从官方文档进入安装流程，再根据系统选择 PowerShell 或 Shell 脚本。",
+      "首次安装前建议先阅读下方站内安装教程，再对照官方文档执行。",
+      "如果需要查看源码安装方式，可直接跳到官方 GitHub 仓库。"
     ]
   },
+  officialLinks: [
+    {
+      label: "官方安装文档",
+      href: "https://openclawdoc.com/docs/getting-started/installation/",
+      description: "官方 Getting Started 安装页，包含脚本安装、npm 安装和源码安装。"
+    },
+    {
+      label: "Windows 安装脚本",
+      href: "https://openclaw.ai/install.ps1",
+      description: "官方文档给出的 Windows PowerShell 一键安装脚本。"
+    },
+    {
+      label: "Linux/macOS 安装脚本",
+      href: "https://openclaw.ai/install.sh",
+      description: "官方文档给出的 Shell 安装脚本，适用于 Linux 与 macOS。"
+    },
+    {
+      label: "官方 GitHub 仓库",
+      href: "https://github.com/openclaw/openclaw",
+      description: "OpenClaw 官方源码仓库，可按官方文档走源码安装。"
+    },
+    {
+      label: "官方配置文档",
+      href: "https://openclawdoc.com/docs/getting-started/configuration/",
+      description: "官方配置说明，包含 `openclaw.yaml`、模型与环境变量设置。"
+    },
+    {
+      label: "官方首次使用文档",
+      href: "https://openclawdoc.com/docs/getting-started/first-conversation/",
+      description: "官方使用入门，包含启动、打开 Web UI、发送第一条消息与排查。"
+    }
+  ] satisfies LobsterOfficialLink[],
   guideCards: [
     {
       id: "downloads",

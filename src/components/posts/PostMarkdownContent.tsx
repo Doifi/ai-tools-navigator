@@ -12,38 +12,56 @@ interface PostMarkdownContentProps {
 }
 
 function renderInline(content: string, relatedTools: RelatedToolSummary[]) {
-  const parts = content.split(/(\[\[[^[\]]+\]\])/g).filter(Boolean);
+  const parts = content
+    .split(/(\[\[[^[\]]+\]\]|\[[^\]]+\]\(https?:\/\/[^)\s]+\))/g)
+    .filter(Boolean);
 
   return parts.map((part, index) => {
     const matched = part.match(/^\[\[([^[\]]+)\]\]$/);
 
-    if (!matched) {
-      return <Fragment key={`${part}-${index}`}>{part}</Fragment>;
+    if (matched) {
+      const toolName = matched[1];
+      const linkedTool = relatedTools.find((tool) => tool.name.toLowerCase() === toolName.toLowerCase());
+
+      if (linkedTool) {
+        return (
+          <Link
+            key={`${toolName}-${index}`}
+            href={`/tools/${linkedTool.id}`}
+            className="rounded-full bg-brand/10 px-2 py-1 font-semibold text-brand transition hover:bg-brand/15"
+          >
+            {linkedTool.name}
+          </Link>
+        );
+      }
+
+      return (
+        <span
+          key={`${toolName}-${index}`}
+          className="rounded-full bg-background px-2 py-1 font-semibold text-foreground"
+        >
+          {toolName}
+        </span>
+      );
     }
 
-    const toolName = matched[1];
-    const linkedTool = relatedTools.find((tool) => tool.name.toLowerCase() === toolName.toLowerCase());
+    const markdownLink = part.match(/^\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)$/);
 
-    if (linkedTool) {
+    if (markdownLink) {
       return (
         <Link
-          key={`${toolName}-${index}`}
-          href={`/tools/${linkedTool.id}`}
-          className="rounded-full bg-brand/10 px-2 py-1 font-semibold text-brand transition hover:bg-brand/15"
+          key={`${markdownLink[2]}-${index}`}
+          href={markdownLink[2]}
+          target="_blank"
+          rel="noreferrer"
+          className="font-semibold text-brand underline decoration-brand/30 underline-offset-4 transition hover:text-brand-strong"
         >
-          {linkedTool.name}
+          {markdownLink[1]}
         </Link>
       );
     }
 
-    return (
-      <span
-        key={`${toolName}-${index}`}
-        className="rounded-full bg-background px-2 py-1 font-semibold text-foreground"
-      >
-        {toolName}
-      </span>
-    );
+    return <Fragment key={`${part}-${index}`}>{part}</Fragment>;
   });
 }
 
