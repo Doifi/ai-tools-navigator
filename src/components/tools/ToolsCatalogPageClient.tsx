@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ArrowUpRight, Eye, Flame, Layers3, MousePointerClick } from "lucide-react";
 
 import { CategoryFilterBar } from "@/components/categories/CategoryFilterBar";
@@ -15,6 +16,7 @@ import { Container } from "@/components/layout/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { SearchBar } from "@/components/ui/SearchBar";
 import { ToolCard } from "@/components/ui/ToolCard";
 import { mapApiCategoryToCard, mapApiToolToCard } from "@/lib/api-mappers";
 import { getIcon } from "@/lib/mock/icon-map";
@@ -127,19 +129,26 @@ function ToolListRow({ tool }: { tool: ReturnType<typeof mapApiToolToCard> }) {
 
 interface ToolsCatalogPageClientProps {
   initialSort?: CategorySortValue;
+  initialQuery?: string;
 }
 
 /**
  * Dedicated tools catalog page.
  */
 export function ToolsCatalogPageClient({
-  initialSort = "hot"
+  initialSort = "hot",
+  initialQuery = ""
 }: ToolsCatalogPageClientProps) {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [activeFilter, setActiveFilter] = useState<CategoryFilterValue>("all");
   const [activeSort, setActiveSort] = useState<CategorySortValue>(initialSort);
   const [viewMode, setViewMode] = useState<CategoryViewMode>("grid");
   const [page, setPage] = useState(1);
   const [activeCategorySlug, setActiveCategorySlug] = useState<string>("all");
+  const [searchInput, setSearchInput] = useState(initialQuery.trim());
+  const [query, setQuery] = useState(initialQuery.trim());
 
   const {
     categories,
@@ -160,6 +169,7 @@ export function ToolsCatalogPageClient({
     page,
     limit: PAGE_SIZE,
     category: activeCategory?.id ?? null,
+    query,
     sort: toApiSort(activeSort),
     priceModel: toPriceFilter(activeFilter),
     apiAvailable: activeFilter === "api" ? true : null
@@ -167,7 +177,40 @@ export function ToolsCatalogPageClient({
 
   useEffect(() => {
     setPage(1);
-  }, [activeFilter, activeSort, activeCategorySlug]);
+  }, [activeFilter, activeSort, activeCategorySlug, query]);
+
+  useEffect(() => {
+    setActiveSort(initialSort);
+  }, [initialSort]);
+
+  useEffect(() => {
+    const normalizedInitialQuery = initialQuery.trim();
+    setSearchInput(normalizedInitialQuery);
+    setQuery(normalizedInitialQuery);
+  }, [initialQuery]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams(searchParams.toString());
+
+    if (activeSort === "hot") {
+      nextParams.delete("sort");
+    } else {
+      nextParams.set("sort", activeSort);
+    }
+
+    if (query) {
+      nextParams.set("q", query);
+    } else {
+      nextParams.delete("q");
+    }
+
+    const nextQueryString = nextParams.toString();
+    const currentQueryString = searchParams.toString();
+
+    if (nextQueryString !== currentQueryString) {
+      router.replace(nextQueryString ? `${pathname}?${nextQueryString}` : pathname, { scroll: false });
+    }
+  }, [activeSort, pathname, query, router, searchParams]);
 
   const toolCards = useMemo(() => tools.map(mapApiToolToCard), [tools]);
   const categoryCards = useMemo(() => categories.map(mapApiCategoryToCard), [categories]);
@@ -184,6 +227,36 @@ export function ToolsCatalogPageClient({
             <p className="mt-5 text-base leading-8 text-foreground/70">
               这里是独立的工具列表页。支持分类筛选、价格筛选、排序和网格/列表切换，不再和首页内容混在一起。
             </p>
+
+            <div className="mt-7 max-w-2xl">
+              <SearchBar
+                placeholder="搜索工具名称、Slug、简介或功能点"
+                value={searchInput}
+                onChange={setSearchInput}
+                onSubmit={(value) => {
+                  setQuery(value.trim());
+                }}
+              />
+            </div>
+
+            {query ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <Badge tone="api" className="px-4 py-2 text-sm">
+                  当前搜索：{query}
+                </Badge>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setSearchInput("");
+                    setQuery("");
+                  }}
+                >
+                  清除搜索
+                </Button>
+              </div>
+            ) : null}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -304,16 +377,20 @@ export function ToolsCatalogPageClient({
         ) : toolCards.length === 0 ? (
           <Card className="flex flex-col items-center justify-center px-6 py-14 text-center">
             <h3 className="font-display text-2xl font-semibold text-foreground">
-              没有找到符合条件的工具
+              {query ? "没有找到相关工具" : "没有找到符合条件的工具"}
             </h3>
             <p className="mt-3 max-w-md text-sm leading-7 text-foreground/64">
-              当前筛选条件下没有结果，可以切换分类或重置筛选后再看。
+              {query
+                ? `没有找到与“${query}”匹配的工具，可以换个关键词，或清空搜索后重新筛选。`
+                : "当前筛选条件下没有结果，可以切换分类或重置筛选后再看。"}
             </p>
             <Button
               type="button"
               variant="outline"
               className="mt-6"
               onClick={() => {
+                setSearchInput("");
+                setQuery("");
                 setActiveFilter("all");
                 setActiveSort(initialSort);
                 setActiveCategorySlug("all");

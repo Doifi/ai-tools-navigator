@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
-import { BookOpenText, Link2, Loader2, Newspaper, Sparkles } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { BookOpenText, Link2, Loader2, Newspaper, Save, Sparkles } from "lucide-react";
 
 import { slugifyPostTitle } from "@/lib/admin/post-form-schema";
 
@@ -18,12 +19,27 @@ interface AdminToolOption {
   slug: string;
 }
 
+export interface AdminPostFormValues {
+  title: string;
+  slug: string;
+  excerpt: string;
+  coverImage: string;
+  author: string;
+  categoryId: string;
+  status: "published" | "draft" | "archived";
+  content: string;
+  relatedToolIds: string[];
+}
+
 interface AdminCreatePostFormProps {
   categories: AdminCategoryOption[];
   tools: AdminToolOption[];
+  mode?: "create" | "edit";
+  postId?: string;
+  initialValues?: Partial<AdminPostFormValues>;
 }
 
-interface CreatePostResponse {
+interface SubmitPostResponse {
   success: boolean;
   post: {
     id: string;
@@ -32,7 +48,7 @@ interface CreatePostResponse {
   };
 }
 
-const initialFormState = {
+const defaultFormState: AdminPostFormValues = {
   title: "",
   slug: "",
   excerpt: "",
@@ -41,22 +57,53 @@ const initialFormState = {
   categoryId: "",
   status: "published",
   content: "",
-  relatedToolIds: [] as string[]
+  relatedToolIds: []
 };
 
-export function AdminCreatePostForm({ categories, tools }: AdminCreatePostFormProps) {
-  const [form, setForm] = useState(initialFormState);
+function buildFormState(initialValues?: Partial<AdminPostFormValues>): AdminPostFormValues {
+  return {
+    ...defaultFormState,
+    ...initialValues,
+    relatedToolIds: initialValues?.relatedToolIds ?? defaultFormState.relatedToolIds
+  };
+}
+
+export function AdminCreatePostForm({
+  categories,
+  tools,
+  mode = "create",
+  postId,
+  initialValues
+}: AdminCreatePostFormProps) {
+  const router = useRouter();
+  const isEditMode = mode === "edit" && Boolean(postId);
+  const [form, setForm] = useState<AdminPostFormValues>(buildFormState(initialValues));
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [serverError, setServerError] = useState("");
-  const [createdPost, setCreatedPost] = useState<CreatePostResponse["post"] | null>(null);
+  const [savedPost, setSavedPost] = useState<SubmitPostResponse["post"] | null>(null);
+
+  useEffect(() => {
+    setForm(buildFormState(initialValues));
+    setErrors({});
+    setServerError("");
+    setSavedPost(null);
+  }, [initialValues]);
 
   const selectedTools = useMemo(
     () => tools.filter((tool) => form.relatedToolIds.includes(tool.id)),
     [form.relatedToolIds, tools]
   );
 
-  const handleChange = (field: keyof typeof initialFormState, value: string | string[]) => {
+  const formTitle = isEditMode ? "编辑文章" : "新建文章";
+  const formDescription = isEditMode
+    ? "这里修改已有文章内容，保存后会同步更新前台文章页和后台列表。"
+    : "这里录入的文章会直接写入真实数据库。发布后会出现在文章列表、首页文章区和详情页里。";
+  const submitLabel = isEditMode ? "保存修改" : "创建文章";
+  const submittingLabel = isEditMode ? "正在保存" : "正在提交";
+  const successLabel = isEditMode ? "文章更新成功" : "文章创建成功";
+
+  const handleChange = (field: keyof AdminPostFormValues, value: string | string[]) => {
     setForm((current) => ({ ...current, [field]: value }));
     setErrors((current) => ({ ...current, [field]: "" }));
     setServerError("");
@@ -74,16 +121,23 @@ export function AdminCreatePostForm({ categories, tools }: AdminCreatePostFormPr
     });
   };
 
+  const resetForm = () => {
+    setForm(buildFormState(isEditMode ? initialValues : undefined));
+    setErrors({});
+    setServerError("");
+    setSavedPost(null);
+  };
+
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsSubmitting(true);
     setServerError("");
-    setCreatedPost(null);
+    setSavedPost(null);
     setErrors({});
 
     try {
-      const response = await fetch("/api/admin/posts", {
-        method: "POST",
+      const response = await fetch(isEditMode ? `/api/admin/posts/${postId}` : "/api/admin/posts", {
+        method: isEditMode ? "PATCH" : "POST",
         headers: {
           "Content-Type": "application/json"
         },
@@ -106,14 +160,21 @@ export function AdminCreatePostForm({ categories, tools }: AdminCreatePostFormPr
           setErrors(nextErrors);
         }
 
-        setServerError(payload?.error || "文章创建失败");
+        setServerError(payload?.error || (isEditMode ? "文章更新失败" : "文章创建失败"));
         return;
       }
 
-      setCreatedPost(payload.post);
-      setForm(initialFormState);
+      setSavedPost(payload.post);
+
+      if (!isEditMode) {
+        setForm(buildFormState());
+      }
+
+      router.refresh();
     } catch (error) {
-      setServerError(error instanceof Error ? error.message : "文章创建失败");
+      setServerError(
+        error instanceof Error ? error.message : isEditMode ? "文章更新失败" : "文章创建失败"
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -124,12 +185,8 @@ export function AdminCreatePostForm({ categories, tools }: AdminCreatePostFormPr
       <form onSubmit={submitForm} className="surface-panel space-y-6 p-6 sm:p-8">
         <div className="space-y-2">
           <p className="eyebrow">Editorial Workflow</p>
-          <h1 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">
-            新建文章
-          </h1>
-          <p className="text-sm leading-7 text-foreground/66">
-            这里录入的文章会直接写入真实数据库。发布后会出现在文章列表、首页文章区和详情页里。
-          </p>
+          <h1 className="font-display text-3xl font-semibold text-foreground sm:text-4xl">{formTitle}</h1>
+          <p className="text-sm leading-7 text-foreground/66">{formDescription}</p>
         </div>
 
         <div className="grid gap-5 md:grid-cols-2">
@@ -295,11 +352,11 @@ const demo = true;
           </div>
         ) : null}
 
-        {createdPost ? (
+        {savedPost ? (
           <div className="rounded-3xl border border-emerald-200 bg-emerald-50 px-5 py-4">
-            <p className="text-sm font-semibold text-emerald-700">文章创建成功</p>
+            <p className="text-sm font-semibold text-emerald-700">{successLabel}</p>
             <div className="mt-2 flex flex-wrap gap-4 text-sm">
-              <Link href={`/posts/${createdPost.slug}`} className="text-brand hover:text-brand-strong">
+              <Link href={`/posts/${savedPost.slug}`} className="text-brand hover:text-brand-strong">
                 查看文章
               </Link>
               <Link href="/admin/posts" className="text-brand hover:text-brand-strong">
@@ -315,8 +372,22 @@ const demo = true;
             disabled={isSubmitting}
             className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92 disabled:cursor-not-allowed disabled:opacity-70"
           >
-            {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Newspaper className="h-4 w-4" />}
-            {isSubmitting ? "正在提交" : "创建文章"}
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isEditMode ? (
+              <Save className="h-4 w-4" />
+            ) : (
+              <Newspaper className="h-4 w-4" />
+            )}
+            {isSubmitting ? submittingLabel : submitLabel}
+          </button>
+
+          <button
+            type="button"
+            onClick={resetForm}
+            className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 px-6 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:text-brand"
+          >
+            {isEditMode ? "恢复已保存内容" : "清空表单"}
           </button>
 
           <Link
@@ -345,7 +416,7 @@ const demo = true;
             <li>摘要控制在两句话内，方便文章列表和首页调用。</li>
             <li>正文建议使用一级、二级标题分段，便于详情页阅读。</li>
             <li>如果文章提到站内工具，建议在正文里用 [[工具名]] 标记。</li>
-            <li>初次发布建议先选“发布”，验证页面效果后再继续批量录入。</li>
+            <li>专题类内容建议统一命名规则，例如“龙虾安装教程”“龙虾使用教程”。</li>
           </ul>
         </div>
 
@@ -401,3 +472,5 @@ const demo = true;
     </div>
   );
 }
+
+export default AdminCreatePostForm;

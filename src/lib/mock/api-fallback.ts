@@ -123,6 +123,7 @@ interface MockToolsQuery {
   limit: number;
   categoryId?: string | null;
   tag?: string | null;
+  query?: string | null;
   sort?: string | null;
   priceModel?: Enums<"price_model"> | null;
   apiAvailable?: string | null;
@@ -133,6 +134,7 @@ export function queryMockApiTools({
   limit,
   categoryId,
   tag,
+  query,
   sort,
   priceModel,
   apiAvailable
@@ -157,6 +159,16 @@ export function queryMockApiTools({
 
   if (tag) {
     tools = tools.filter((tool) => tool.tags?.includes(tag));
+  }
+
+  if (query) {
+    const normalizedQuery = query.trim().toLocaleLowerCase();
+
+    tools = tools.filter((tool) =>
+      [tool.name, tool.slug, tool.description, tool.detailed_intro, ...(tool.tags ?? []), ...(tool.features ?? [])]
+        .filter((field): field is string => Boolean(field))
+        .some((field) => field.toLocaleLowerCase().includes(normalizedQuery))
+    );
   }
 
   switch (sort) {

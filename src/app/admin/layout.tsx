@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { LayoutDashboard, Wrench } from "lucide-react";
+import { LayoutDashboard, Newspaper, Wrench } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
@@ -18,6 +18,11 @@ const navItems = [
     href: "/admin",
     label: "审核提交",
     icon: LayoutDashboard
+  },
+  {
+    href: "/admin/posts",
+    label: "文章管理",
+    icon: Newspaper
   },
   {
     href: "/admin/tools",

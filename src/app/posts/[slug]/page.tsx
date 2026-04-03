@@ -29,6 +29,8 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
   }
 
   const relatedToolIds = Array.isArray(post.related_tools) ? post.related_tools : [];
+  const categoryId = post.category_id;
+  const publishedAt = post.published_at;
 
   const [{ data: relatedTools }, { data: relatedPosts }, { data: previousPost }, { data: nextPost }] =
     await Promise.all([
@@ -47,30 +49,44 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
               website_url: string;
             }>
           }),
-      supabase
-        .from("posts")
-        .select("id, title, slug, excerpt, published_at")
-        .neq("id", post.id)
-        .eq("status", "published")
-        .eq("category_id", post.category_id)
-        .order("published_at", { ascending: false })
-        .limit(6),
-      supabase
-        .from("posts")
-        .select("title, slug")
-        .eq("status", "published")
-        .lt("published_at", post.published_at)
-        .order("published_at", { ascending: false })
-        .limit(1)
-        .maybeSingle(),
-      supabase
-        .from("posts")
-        .select("title, slug")
-        .eq("status", "published")
-        .gt("published_at", post.published_at)
-        .order("published_at", { ascending: true })
-        .limit(1)
-        .maybeSingle()
+      categoryId
+        ? supabase
+            .from("posts")
+            .select("id, title, slug, excerpt, published_at")
+            .neq("id", post.id)
+            .eq("status", "published")
+            .eq("category_id", categoryId)
+            .order("published_at", { ascending: false })
+            .limit(6)
+        : Promise.resolve({
+            data: [] as Array<{
+              id: string;
+              title: string;
+              slug: string;
+              excerpt: string | null;
+              published_at: string | null;
+            }>
+          }),
+      publishedAt
+        ? supabase
+            .from("posts")
+            .select("title, slug")
+            .eq("status", "published")
+            .lt("published_at", publishedAt)
+            .order("published_at", { ascending: false })
+            .limit(1)
+            .maybeSingle()
+        : Promise.resolve({ data: null as { title: string; slug: string } | null }),
+      publishedAt
+        ? supabase
+            .from("posts")
+            .select("title, slug")
+            .eq("status", "published")
+            .gt("published_at", publishedAt)
+            .order("published_at", { ascending: true })
+            .limit(1)
+            .maybeSingle()
+        : Promise.resolve({ data: null as { title: string; slug: string } | null })
     ]);
 
   return (

@@ -22,6 +22,35 @@
 
 当前已接入 GitHub + Vercel 自动部署。
 
+### 当前部署记录
+
+- Vercel 项目：`doifi's projects / ai-tools-navigator`
+- 项目 ID：`prj_cC4fm6pCP80mzfM5s6A8w8PiEavv`
+- 稳定线上地址：`https://ai-tools-navigator-doifis-projects.vercel.app`
+- 备用线上别名：`https://ai-tools-navigator-navy.vercel.app`
+- Git 主分支别名：`https://ai-tools-navigator-git-main-doifis-projects.vercel.app`
+
+### 后台入口记录
+
+- 后台首页：`/admin`
+- 后台登录：`/admin/login`
+- 工具管理：`/admin/tools`
+- 新建工具：`/admin/tools/new`
+- 文章管理：`/admin/posts`
+- 新建文章：`/admin/posts/new`
+
+### 后台口令记录
+
+- 后台口令由环境变量 `ADMIN_PASSWORD` 控制
+- 本地开发时以项目根目录 `.env.local` 为准
+- 线上环境时以 Vercel Project Environment Variables 为准
+- 如口令变更，需要同步更新本地 `.env.local` 和 Vercel 环境变量
+
+### 最近一次已确认可用的生产部署
+
+- 确认时间：2026-04-03
+- 当前稳定别名指向的成功部署时间：2026-04-02 08:59:23（Asia/Shanghai）
+
 标准发版流程：
 
 1. 在本地完成功能开发
@@ -60,4 +89,3 @@
 2. 再改 API
 3. 再改页面
 4. 最后补文档
-

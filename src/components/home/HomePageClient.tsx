@@ -2,8 +2,10 @@
 
 import { useMemo } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 import { Container } from "@/components/layout/Container";
+import { LobsterZoneSection } from "@/components/home/LobsterZoneSection";
 import { Button } from "@/components/ui/Button";
 import { CategoryCard } from "@/components/ui/CategoryCard";
 import { PostCard } from "@/components/ui/PostCard";
@@ -16,6 +18,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useTools } from "@/hooks/useTools";
 
 const hotSearchKeywords = [
+  { label: "龙虾专区", href: "/lobster" },
   { label: "AI绘画", href: "/categories/ai-drawing" },
   { label: "AI文案", href: "/categories/ai-copywriting" },
   { label: "AI视频", href: "/categories/ai-video" },
@@ -43,6 +46,7 @@ function SectionError({
 }
 
 export function HomePageClient() {
+  const router = useRouter();
   const {
     categories,
     isLoading: categoriesLoading,
@@ -105,7 +109,13 @@ export function HomePageClient() {
           </p>
 
           <div className="mx-auto mt-8 max-w-3xl">
-            <SearchBar placeholder="搜索 AI 工具..." />
+            <SearchBar
+              placeholder="搜索 AI 工具、产品名称或使用场景"
+              onSubmit={(value) => {
+                const keyword = value.trim();
+                router.push(keyword ? `/tools?q=${encodeURIComponent(keyword)}` : "/tools");
+              }}
+            />
           </div>
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
@@ -121,6 +131,8 @@ export function HomePageClient() {
           </div>
         </div>
       </section>
+
+      <LobsterZoneSection />
 
       <section
         id="categories"

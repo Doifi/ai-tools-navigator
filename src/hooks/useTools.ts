@@ -12,6 +12,7 @@ interface UseToolsOptions {
   limit?: number;
   category?: string | null;
   tag?: string | null;
+  query?: string | null;
   sort?: ToolsSortValue;
   priceModel?: Enums<"price_model"> | null;
   apiAvailable?: boolean | null;
@@ -47,6 +48,10 @@ function buildToolsUrl(options: UseToolsOptions) {
     params.set("tag", options.tag);
   }
 
+  if (options.query) {
+    params.set("q", options.query);
+  }
+
   if (options.sort) {
     params.set("sort", options.sort);
   }
@@ -76,6 +81,7 @@ export function useTools(options: UseToolsOptions = {}) {
     options.limit,
     options.page,
     options.priceModel,
+    options.query,
     options.sort,
     options.tag
   ]);

@@ -5,9 +5,24 @@ import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Enums } from "@/types/supabase";
 
+export const dynamic = "force-dynamic";
+
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 12;
 const MAX_LIMIT = 50;
+
+function normalizeSearchQuery(rawValue: string | null) {
+  if (!rawValue) {
+    return null;
+  }
+
+  const normalizedValue = rawValue
+    .replace(/[,%(){}\[\]"']/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  return normalizedValue || null;
+}
 
 /**
  * GET /api/tools
@@ -32,6 +47,7 @@ export async function GET(request: Request) {
   const categoryId = searchParams.get("category");
   const tag = searchParams.get("tag");
   const sort = searchParams.get("sort") ?? "latest";
+  const keyword = normalizeSearchQuery(searchParams.get("q"));
   const priceModel = searchParams.get("price_model") as Enums<"price_model"> | null;
   const apiAvailable = searchParams.get("api_available");
 
@@ -41,6 +57,7 @@ export async function GET(request: Request) {
     categoryId,
     tag,
     sort,
+    query: keyword,
     priceModel,
     apiAvailable
   });
@@ -51,47 +68,57 @@ export async function GET(request: Request) {
 
   try {
     const supabase = createServerSupabaseClient();
-    let query = supabase
+    let toolsQuery = supabase
       .from("tools")
       .select("*, categories(*)", { count: "exact" })
       .eq("status", "published");
 
     if (categoryId) {
-      query = query.eq("category_id", categoryId);
+      toolsQuery = toolsQuery.eq("category_id", categoryId);
     }
 
     if (priceModel) {
-      query = query.eq("price_model", priceModel);
+      toolsQuery = toolsQuery.eq("price_model", priceModel);
     }
 
     if (apiAvailable === "true") {
-      query = query.eq("api_available", true);
+      toolsQuery = toolsQuery.eq("api_available", true);
     }
 
     if (apiAvailable === "false") {
-      query = query.eq("api_available", false);
+      toolsQuery = toolsQuery.eq("api_available", false);
     }
 
     if (tag) {
-      query = query.contains("tags", [tag]);
+      toolsQuery = toolsQuery.contains("tags", [tag]);
+    }
+
+    if (keyword) {
+      toolsQuery = toolsQuery.or(
+        `name.ilike.%${keyword}%,slug.ilike.%${keyword}%,description.ilike.%${keyword}%,detailed_intro.ilike.%${keyword}%`
+      );
     }
 
     switch (sort) {
       case "popular":
-        query = query.order("views", { ascending: false }).order("published_at", { ascending: false });
+        toolsQuery = toolsQuery
+          .order("views", { ascending: false })
+          .order("published_at", { ascending: false });
         break;
       case "click":
-        query = query.order("clicks", { ascending: false }).order("published_at", { ascending: false });
+        toolsQuery = toolsQuery
+          .order("clicks", { ascending: false })
+          .order("published_at", { ascending: false });
         break;
       case "latest":
       default:
-        query = query.order("published_at", { ascending: false });
+        toolsQuery = toolsQuery.order("published_at", { ascending: false });
         break;
     }
 
     const from = (page - 1) * limit;
     const to = from + limit - 1;
-    const { data, error, count } = await query.range(from, to);
+    const { data, error, count } = await toolsQuery.range(from, to);
 
     if (error) {
       throw error;

@@ -5,6 +5,8 @@ import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import type { Tables } from "@/types/supabase";
 
+export const dynamic = "force-dynamic";
+
 type CategoryWithToolsCount = Tables<"categories"> & {
   tools: Array<{
     count: number | null;

@@ -2,6 +2,7 @@ import { ToolsCatalogPageClient } from "@/components/tools/ToolsCatalogPageClien
 
 interface ToolsPageProps {
   searchParams?: {
+    q?: string;
     sort?: string;
   };
 }
@@ -15,5 +16,10 @@ function normalizeSort(sort?: string) {
 }
 
 export default function ToolsPage({ searchParams }: ToolsPageProps) {
-  return <ToolsCatalogPageClient initialSort={normalizeSort(searchParams?.sort)} />;
+  return (
+    <ToolsCatalogPageClient
+      initialSort={normalizeSort(searchParams?.sort)}
+      initialQuery={searchParams?.q?.trim() ?? ""}
+    />
+  );
 }
