@@ -20,7 +20,7 @@ export function LobsterZoneSection() {
 
       <div className="relative grid gap-8 lg:grid-cols-[1.05fr_0.95fr] lg:items-start">
         <div className="max-w-3xl">
-          <p className="eyebrow">Lobster Zone</p>
+          <p className="eyebrow">OpenClaw Hub</p>
           <h2 className="mt-4 font-display text-3xl font-semibold text-foreground sm:text-4xl">
             {lobsterZone.title}
           </h2>
@@ -87,7 +87,7 @@ export function LobsterZoneSection() {
             </div>
             <h3 className="mt-4 font-display text-2xl font-semibold">一站式整理</h3>
             <p className="mt-3 text-sm leading-7 text-white/74">
-              先把龙虾相关资源集中到专区，再逐步扩展成完整教程和专题内容。
+              先把 OpenClaw（龙虾）相关资源集中到专区，再逐步扩展成完整教程和专题内容。
             </p>
           </div>
         </div>

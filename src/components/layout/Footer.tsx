@@ -9,7 +9,7 @@ const footerLinks = [
     items: [
       { label: "热门工具", href: "/tools" },
       { label: "精选分类", href: "/categories" },
-      { label: "龙虾专区", href: "/lobster" },
+      { label: "OpenClaw专区", href: "/lobster" },
       { label: "最新文章", href: "/posts" }
     ]
   },

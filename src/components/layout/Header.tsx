@@ -11,7 +11,7 @@ const navItems = [
   { href: "/", label: "首页" },
   { href: "/tools", label: "热门工具" },
   { href: "/categories", label: "精选分类" },
-  { href: "/lobster", label: "龙虾专区" },
+  { href: "/lobster", label: "OpenClaw专区" },
   { href: "/posts", label: "文章教程" },
   { href: "/submit", label: "提交工具" }
 ];

@@ -18,7 +18,7 @@ import { usePosts } from "@/hooks/usePosts";
 import { useTools } from "@/hooks/useTools";
 
 const hotSearchKeywords = [
-  { label: "龙虾专区", href: "/lobster" },
+  { label: "OpenClaw专区", href: "/lobster" },
   { label: "AI绘画", href: "/categories/ai-drawing" },
   { label: "AI文案", href: "/categories/ai-copywriting" },
   { label: "AI视频", href: "/categories/ai-video" },

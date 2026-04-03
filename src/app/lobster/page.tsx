@@ -8,8 +8,8 @@ import { Card } from "@/components/ui/Card";
 import { getLobsterDownloadHref, lobsterTutorialPosts, lobsterZone } from "@/lib/lobster";
 
 export const metadata: Metadata = {
-  title: "龙虾专区 | AI Tools Navigator",
-  description: "集中查看龙虾安装包、安装教程和使用教程。"
+  title: "OpenClaw（龙虾）专区 | AI Tools Navigator",
+  description: "集中查看 OpenClaw（龙虾）安装包、安装教程和使用教程。"
 };
 
 const iconMap = {
@@ -30,7 +30,7 @@ export default function LobsterPage() {
 
         <div className="relative grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-end">
           <div className="max-w-3xl">
-            <p className="eyebrow">Lobster Resource Hub</p>
+            <p className="eyebrow">OpenClaw Resource Hub</p>
             <h1 className="mt-4 font-display text-4xl font-semibold text-foreground sm:text-5xl">
               {lobsterZone.title}
             </h1>
@@ -38,7 +38,7 @@ export default function LobsterPage() {
             <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground/64">{lobsterZone.description}</p>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              <Badge tone="new">龙虾安装包</Badge>
+              <Badge tone="new">OpenClaw 安装包</Badge>
               <Badge tone="api">安装教程</Badge>
               <Badge tone="plugin">使用教程</Badge>
             </div>
@@ -53,14 +53,14 @@ export default function LobsterPage() {
                 {hasDownloadUrl ? "立即下载安装包" : "查看安装包说明"}
                 <ArrowRight className="h-4 w-4" />
               </Link>
-            <Link
-              href={lobsterTutorialPosts.install.href}
-              className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 bg-white/90 px-6 text-sm font-semibold text-foreground transition hover:border-accent-coral/35 hover:text-accent-coral"
-            >
-              阅读安装教程
-            </Link>
+              <Link
+                href={lobsterTutorialPosts.install.href}
+                className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 bg-white/90 px-6 text-sm font-semibold text-foreground transition hover:border-accent-coral/35 hover:text-accent-coral"
+              >
+                阅读安装教程
+              </Link>
+            </div>
           </div>
-        </div>
 
           <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
             {lobsterZone.guideCards.map((card) => {
@@ -146,7 +146,7 @@ export default function LobsterPage() {
         <div>
           <p className="eyebrow">Install Guide</p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-foreground sm:text-4xl">
-            龙虾安装教程
+            OpenClaw（龙虾）安装教程
           </h2>
         </div>
 
@@ -186,7 +186,7 @@ export default function LobsterPage() {
         <div>
           <p className="eyebrow">Usage Guide</p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-foreground sm:text-4xl">
-            龙虾使用教程
+            OpenClaw（龙虾）使用教程
           </h2>
         </div>
 
