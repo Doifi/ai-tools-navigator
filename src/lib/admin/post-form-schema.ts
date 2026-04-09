@@ -29,7 +29,12 @@ export const adminCreatePostSchema = z.object({
   relatedToolIds: z.array(z.string().uuid("关联工具格式不正确")).default([])
 });
 
+export const adminUpdatePostStatusSchema = z.object({
+  status: z.enum(adminPostStatuses)
+});
+
 export type AdminCreatePostInput = z.infer<typeof adminCreatePostSchema>;
+export type AdminUpdatePostStatusInput = z.infer<typeof adminUpdatePostStatusSchema>;
 
 export function slugifyPostTitle(value: string) {
   return value

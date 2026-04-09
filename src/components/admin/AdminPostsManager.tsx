@@ -1,10 +1,23 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
-import { CalendarDays, Eye, FileEdit, Plus, Search } from "lucide-react";
+import {
+  Archive,
+  CalendarDays,
+  Eye,
+  EyeOff,
+  FileEdit,
+  Plus,
+  RotateCcw,
+  Search,
+  Send,
+  Trash2
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatDate } from "@/lib/utils";
 import type { Tables } from "@/types/supabase";
@@ -60,12 +73,23 @@ const statusOptions: Array<{
   { value: "archived", label: "已归档" }
 ];
 
+type PostActionState =
+  | {
+      postId: string;
+      action: "publish" | "draft" | "archive" | "delete";
+    }
+  | null;
+
 /**
  * Admin posts inventory with search, filter, and edit entry.
  */
 export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PostStatusFilter>("all");
+  const [actionState, setActionState] = useState<PostActionState>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const filteredPosts = useMemo(() => {
     const normalizedQuery = query.trim().toLowerCase();
@@ -88,6 +112,75 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
     [posts]
   );
   const draftCount = useMemo(() => posts.filter((post) => post.status === "draft").length, [posts]);
+
+  const handleStatusChange = async (
+    post: AdminPostRecord,
+    nextStatus: "published" | "draft" | "archived",
+    action: NonNullable<PostActionState>["action"]
+  ) => {
+    setActionState({ postId: post.id, action });
+    setFeedback(null);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/admin/posts/${post.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ status: nextStatus })
+      });
+
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "状态更新失败");
+      }
+
+      setFeedback(`《${post.title}》已切换为${statusLabel(nextStatus)}。`);
+      router.refresh();
+    } catch (actionError) {
+      setError(actionError instanceof Error ? actionError.message : "状态更新失败");
+    } finally {
+      setActionState(null);
+    }
+  };
+
+  const handleDelete = async (post: AdminPostRecord) => {
+    const shouldDelete = window.confirm(`确认删除《${post.title}》？删除后无法恢复。`);
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setActionState({ postId: post.id, action: "delete" });
+    setFeedback(null);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/admin/posts/${post.id}`, {
+        method: "DELETE"
+      });
+
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "文章删除失败");
+      }
+
+      setFeedback(payload?.message ?? `《${post.title}》已删除。`);
+      router.refresh();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "文章删除失败");
+    } finally {
+      setActionState(null);
+    }
+  };
 
   return (
     <section className="space-y-8">
@@ -155,56 +248,135 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
         </div>
 
         <div className="text-sm text-foreground/58">当前匹配 {filteredPosts.length} 篇文章</div>
+
+        {feedback ? (
+          <div className="rounded-[1.25rem] border border-success/20 bg-success/5 px-4 py-3 text-sm text-success">
+            {feedback}
+          </div>
+        ) : null}
+
+        {error ? (
+          <div className="rounded-[1.25rem] border border-warning/30 bg-warning/5 px-4 py-3 text-sm text-warning">
+            {error}
+          </div>
+        ) : null}
       </Card>
 
       <div className="grid gap-5">
-        {filteredPosts.map((post) => (
-          <article key={post.id} className="surface-panel p-6 sm:p-7">
-            <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge tone={statusTone(post.status)}>{statusLabel(post.status)}</Badge>
-                  <span className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground/44">
-                    {post.categories?.name ?? "未分类"}
-                  </span>
-                </div>
-                <h2 className="mt-4 font-display text-2xl font-semibold text-foreground">{post.title}</h2>
-                <p className="mt-3 text-sm leading-7 text-foreground/66">{post.excerpt}</p>
-                <div className="mt-5 flex flex-wrap gap-4 text-sm text-foreground/54">
-                  <span>{post.author || "未填写作者"}</span>
-                  <span className="inline-flex items-center gap-2">
-                    <CalendarDays className="h-4 w-4" />
-                    {post.published_at
-                      ? formatDate(post.published_at)
-                      : `创建于 ${formatDate(post.created_at ?? new Date().toISOString())}`}
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <Eye className="h-4 w-4" />
-                    {post.views ?? 0}
-                  </span>
-                </div>
-              </div>
+        {filteredPosts.map((post) => {
+          const isWorking = actionState?.postId === post.id;
 
-              <div className="flex shrink-0 flex-wrap gap-3">
-                {post.status === "published" ? (
-                  <Link
-                    href={`/posts/${post.slug}`}
-                    className="inline-flex h-11 items-center justify-center rounded-full border border-line/70 px-5 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:text-brand"
+          const primaryAction =
+            post.status === "draft"
+              ? {
+                  action: "publish" as const,
+                  label: "立即发布",
+                  nextStatus: "published" as const,
+                  icon: <Send className="h-4 w-4" />
+                }
+              : post.status === "published"
+                ? {
+                    action: "draft" as const,
+                    label: "转为草稿",
+                    nextStatus: "draft" as const,
+                    icon: <EyeOff className="h-4 w-4" />
+                  }
+                : {
+                    action: "draft" as const,
+                    label: "恢复草稿",
+                    nextStatus: "draft" as const,
+                    icon: <RotateCcw className="h-4 w-4" />
+                  };
+
+          return (
+            <article key={post.id} className="surface-panel p-6 sm:p-7">
+              <div className="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <Badge tone={statusTone(post.status)}>{statusLabel(post.status)}</Badge>
+                    <span className="text-xs font-semibold uppercase tracking-[0.16em] text-foreground/44">
+                      {post.categories?.name ?? "未分类"}
+                    </span>
+                  </div>
+                  <h2 className="mt-4 font-display text-2xl font-semibold text-foreground">
+                    {post.title}
+                  </h2>
+                  <p className="mt-3 text-sm leading-7 text-foreground/66">{post.excerpt}</p>
+                  <div className="mt-5 flex flex-wrap gap-4 text-sm text-foreground/54">
+                    <span>{post.author || "未填写作者"}</span>
+                    <span className="inline-flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4" />
+                      {post.published_at
+                        ? formatDate(post.published_at)
+                        : `创建于 ${formatDate(post.created_at ?? new Date().toISOString())}`}
+                    </span>
+                    <span className="inline-flex items-center gap-2">
+                      <Eye className="h-4 w-4" />
+                      {post.views ?? 0}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-wrap gap-3">
+                  {post.status === "published" ? (
+                    <Link
+                      href={`/posts/${post.slug}`}
+                      className="inline-flex h-11 items-center justify-center rounded-full border border-line/70 px-5 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:text-brand"
+                    >
+                      查看前台
+                    </Link>
+                  ) : null}
+
+                  <Button
+                    type="button"
+                    size="md"
+                    variant="outline"
+                    loading={isWorking && actionState?.action === primaryAction.action}
+                    leftIcon={primaryAction.icon}
+                    onClick={() =>
+                      void handleStatusChange(post, primaryAction.nextStatus, primaryAction.action)
+                    }
                   >
-                    查看前台
+                    {primaryAction.label}
+                  </Button>
+
+                  {post.status !== "archived" ? (
+                    <Button
+                      type="button"
+                      size="md"
+                      variant="outline"
+                      loading={isWorking && actionState?.action === "archive"}
+                      leftIcon={<Archive className="h-4 w-4" />}
+                      onClick={() => void handleStatusChange(post, "archived", "archive")}
+                    >
+                      归档
+                    </Button>
+                  ) : null}
+
+                  <Link
+                    href={`/admin/posts/${post.id}`}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-background/80"
+                  >
+                    <FileEdit className="h-4 w-4" />
+                    编辑文章
                   </Link>
-                ) : null}
-                <Link
-                  href={`/admin/posts/${post.id}`}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-background/80"
-                >
-                  <FileEdit className="h-4 w-4" />
-                  编辑文章
-                </Link>
+
+                  <Button
+                    type="button"
+                    size="md"
+                    variant="ghost"
+                    loading={isWorking && actionState?.action === "delete"}
+                    leftIcon={<Trash2 className="h-4 w-4" />}
+                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                    onClick={() => void handleDelete(post)}
+                  >
+                    删除
+                  </Button>
+                </div>
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
 
         {filteredPosts.length ? null : (
           <div className="surface-panel p-8 text-center">
