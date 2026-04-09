@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/Container";
 import { PostMarkdownContent } from "@/components/posts/PostMarkdownContent";
+import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +17,13 @@ interface PostDetailPageProps {
 }
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
-  const supabase = createServerSupabaseClient();
+  if (!hasPublicSupabaseEnv() && !hasAdminSupabaseEnv()) {
+    notFound();
+  }
+
+  const supabase = hasPublicSupabaseEnv()
+    ? createServerSupabaseClient()
+    : createAdminSupabaseClient();
 
   const { data: post, error } = await supabase
     .from("posts")

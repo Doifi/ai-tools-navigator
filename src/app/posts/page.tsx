@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ArrowLeft, ArrowRight, Eye, Mail, Newspaper, Sparkles } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
+import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +22,14 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
   const selectedCategory = searchParams?.category || "";
   const from = (currentPage - 1) * PAGE_SIZE;
   const to = from + PAGE_SIZE - 1;
-  const supabase = createServerSupabaseClient();
+
+  if (!hasPublicSupabaseEnv() && !hasAdminSupabaseEnv()) {
+    throw new Error("Missing Supabase environment variables for posts pages.");
+  }
+
+  const supabase = hasPublicSupabaseEnv()
+    ? createServerSupabaseClient()
+    : createAdminSupabaseClient();
 
   let postsQuery = supabase
     .from("posts")
