@@ -50,7 +50,7 @@ export function LobsterZoneSection() {
               href="/lobster#downloads"
               className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 bg-white/88 px-6 text-sm font-semibold text-foreground transition hover:border-accent-coral/35 hover:text-accent-coral"
             >
-              查看安装包
+              查看官方入口
             </Link>
           </div>
         </div>
@@ -85,9 +85,9 @@ export function LobsterZoneSection() {
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/12">
               <BookOpenText className="h-5 w-5" />
             </div>
-            <h3 className="mt-4 font-display text-2xl font-semibold">一站式整理</h3>
+            <h3 className="mt-4 font-display text-2xl font-semibold">官方资料映射</h3>
             <p className="mt-3 text-sm leading-7 text-white/74">
-              先把 OpenClaw（龙虾）相关资源集中到专区，再逐步扩展成完整教程和专题内容。
+              专区内容现在按官方主页、官方文档、官方 FAQ 和官方 GitHub 仓库来整理，便于持续核对。
             </p>
           </div>
         </div>
