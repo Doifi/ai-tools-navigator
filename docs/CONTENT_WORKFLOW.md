@@ -38,20 +38,23 @@
 npm run sync:official-tools
 ```
 
-当前脚本会同步一批常用工具的真实官网地址和基础资料，包括：
+当前脚本会同步一批常用工具的真实官网地址和基础资料，覆盖：
 
-- ChatGPT
-- Claude
-- Midjourney
-- Runway
-- Cursor
-- GitHub Copilot
-- ElevenLabs
-- Suno
-- Notion AI
-- Perplexity
-- Jasper
-- Canva Magic Design
+- 海外通用助手与搜索：ChatGPT、Claude、Gemini、Microsoft Copilot、Perplexity、Notion AI
+- 海外编程工具：Cursor、GitHub Copilot、Windsurf、Replit、Bolt.new
+- 海外设计 / 视频 / 音频：Midjourney、Leonardo AI、Canva Magic Design、Figma AI、Runway、Pika、Synthesia、HeyGen、ElevenLabs、Suno、Udio
+- 国内通用助手与搜索：DeepSeek、豆包、Kimi、通义千问、腾讯元宝、智谱清言、讯飞星火、天工AI、秘塔AI搜索、文心一言、腾讯混元、Monica、Manus、通义听悟
+- 国内视频 / 设计 / 编程：即梦AI、可灵AI、海螺AI、腾讯智影、AiPPT、WHEE、通义灵码、Trae
+
+当前目录源文件位置：
+
+- `scripts/official-tools-catalog.mjs`
+
+当前内置目录覆盖：
+
+- 50 个真实官网工具
+- 海外工具 28 个
+- 国内工具 22 个
 
 ## 录入方式 B：用户投稿后审核
 
