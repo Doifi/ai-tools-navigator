@@ -85,7 +85,7 @@ export function getMockApiTools(): ApiTool[] {
 }
 
 export function getMockApiToolById(id: string) {
-  return getMockApiTools().find((tool) => tool.id === id) ?? null;
+  return getMockApiTools().find((tool) => tool.id === id || tool.slug === id) ?? null;
 }
 
 export function getMockApiPosts(): ApiPost[] {

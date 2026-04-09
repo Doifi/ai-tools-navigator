@@ -9,6 +9,12 @@
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_PASSWORD`
 
+补充说明：
+
+- Vercel 的 `preview` 环境也必须同步以上四个变量，不能只配 `production`
+- 如果 `preview` 缺少 Supabase 变量，工具页、文章页和 OpenClaw 教程页会退回 mock 数据，严重时会直接出现 404
+- 手动 `vercel deploy` 后如果发现预览页和生产页数据不一致，先检查 `preview` 环境变量是否齐全
+
 ## 本地开发流程
 
 1. 拉取最新代码

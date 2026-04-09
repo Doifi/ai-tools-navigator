@@ -1,4 +1,7 @@
+import { redirect } from "next/navigation";
+
 import { CategoryPageClient } from "@/components/categories/CategoryPageClient";
+import { resolveCategorySlugAlias } from "@/lib/routing/legacy";
 
 interface CategoryPageProps {
   params: {
@@ -7,5 +10,11 @@ interface CategoryPageProps {
 }
 
 export default function CategoryPage({ params }: CategoryPageProps) {
-  return <CategoryPageClient slug={params.slug} />;
+  const resolvedSlug = resolveCategorySlugAlias(params.slug);
+
+  if (resolvedSlug !== params.slug) {
+    redirect(`/categories/${resolvedSlug}`);
+  }
+
+  return <CategoryPageClient slug={resolvedSlug} />;
 }

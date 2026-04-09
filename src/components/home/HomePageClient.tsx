@@ -20,7 +20,7 @@ import { useTools } from "@/hooks/useTools";
 const hotSearchKeywords = [
   { label: "OpenClaw专区", href: "/lobster" },
   { label: "AI绘画", href: "/categories/ai-drawing" },
-  { label: "AI文案", href: "/categories/ai-copywriting" },
+  { label: "AI文案", href: "/categories/ai-writing" },
   { label: "AI视频", href: "/categories/ai-video" },
   { label: "AI编程", href: "/categories/ai-coding" }
 ];

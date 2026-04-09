@@ -15,7 +15,8 @@ interface ToolDetailRouteProps {
  * Returns a single published tool. Falls back to mock data when Supabase is not configured.
  */
 export async function GET(_request: Request, { params }: ToolDetailRouteProps) {
-  const fallbackTool = getMockApiToolById(params.id);
+  const identifier = params.id.trim();
+  const fallbackTool = getMockApiToolById(identifier);
 
   if (!hasPublicSupabaseEnv()) {
     if (!fallbackTool) {
@@ -30,9 +31,9 @@ export async function GET(_request: Request, { params }: ToolDetailRouteProps) {
     const { data, error } = await supabase
       .from("tools")
       .select("*, categories(*)")
-      .eq("id", params.id)
       .eq("status", "published")
-      .single();
+      .or(`id.eq.${identifier},slug.eq.${identifier}`)
+      .maybeSingle();
 
     if (error) {
       if (error.code === "PGRST116") {
@@ -42,7 +43,11 @@ export async function GET(_request: Request, { params }: ToolDetailRouteProps) {
       throw error;
     }
 
-    const { error: viewError } = await supabase.rpc("increment_tool_views", { tool_id: params.id });
+    if (!data) {
+      return NextResponse.json({ error: "Tool not found" }, { status: 404 });
+    }
+
+    const { error: viewError } = await supabase.rpc("increment_tool_views", { tool_id: data.id });
 
     if (viewError) {
       console.error("increment_tool_views failed:", viewError.message);
