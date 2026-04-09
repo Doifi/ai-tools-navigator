@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenText, Download, PlayCircle, Store, Wrench } from "lucide-react";
+import { ArrowRight, ArrowUpRight, BookOpenText, Download, PlayCircle, Store, Wrench } from "lucide-react";
 
 import { lobsterZone } from "@/lib/lobster";
 
@@ -28,12 +28,12 @@ export function LobsterZoneSection() {
           <p className="mt-4 max-w-2xl text-sm leading-7 text-foreground/64">{lobsterZone.description}</p>
 
           <div className="mt-6 flex flex-wrap gap-2">
-            {lobsterZone.guideCards.map((card) => (
+            {lobsterZone.heroBadges.map((badge) => (
               <span
-                key={card.id}
+                key={badge}
                 className="rounded-full border border-line/70 bg-white/80 px-4 py-2 text-sm font-medium text-foreground/70"
               >
-                {card.title}
+                {badge}
               </span>
             ))}
           </div>
@@ -54,31 +54,52 @@ export function LobsterZoneSection() {
             </Link>
           </div>
 
-          <a
-            href={lobsterZone.skillsMarket.href}
-            target="_blank"
-            rel="noreferrer"
-            className="group mt-6 flex max-w-sm items-start gap-4 rounded-[1.5rem] border border-line/70 bg-white/86 p-4 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-glow"
-          >
-            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
-              <Store className="h-5 w-5" />
-            </div>
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground/42">
+          <div className="mt-7 grid gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,0.92fr)]">
+            <a
+              href={lobsterZone.skillsMarket.href}
+              target="_blank"
+              rel="noreferrer"
+              className="group rounded-[1.75rem] border border-brand/14 bg-gradient-to-br from-brand/10 via-white to-brand-soft/16 p-5 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand/30 hover:shadow-glow"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand text-white shadow-soft">
+                  <Store className="h-5 w-5" />
+                </div>
+                <span className="rounded-full border border-brand/14 bg-white/82 px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-brand">
+                  clawhub.ai
+                </span>
+              </div>
+              <p className="mt-4 text-xs font-semibold uppercase tracking-[0.18em] text-foreground/42">
                 {lobsterZone.skillsMarket.eyebrow}
               </p>
-              <h3 className="mt-2 font-display text-xl font-semibold text-foreground">
+              <h3 className="mt-2 font-display text-2xl font-semibold text-foreground">
                 {lobsterZone.skillsMarket.title}
               </h3>
-              <p className="mt-2 text-sm leading-6 text-foreground/64">
+              <p className="mt-3 max-w-md text-sm leading-7 text-foreground/64">
                 {lobsterZone.skillsMarket.description}
               </p>
-              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand">
+              <div className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-brand">
                 {lobsterZone.skillsMarket.cta}
-                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+                <ArrowUpRight className="h-4 w-4 transition group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
               </div>
+            </a>
+
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              {lobsterZone.quickFacts.slice(0, 2).map((fact) => (
+                <a
+                  key={fact.label}
+                  href={fact.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-[1.5rem] border border-line/70 bg-white/84 p-4 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand/28 hover:shadow-glow"
+                >
+                  <p className="text-2xl font-semibold tracking-[-0.03em] text-foreground">{fact.value}</p>
+                  <p className="mt-2 text-sm font-semibold text-foreground">{fact.label}</p>
+                  <p className="mt-2 text-xs leading-6 text-foreground/56">{fact.description}</p>
+                </a>
+              ))}
             </div>
-          </a>
+          </div>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">

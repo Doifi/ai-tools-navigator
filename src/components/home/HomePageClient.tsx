@@ -3,6 +3,7 @@
 import { useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ArrowUpRight, Store } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
 import { LobsterZoneSection } from "@/components/home/LobsterZoneSection";
@@ -19,6 +20,7 @@ import { useTools } from "@/hooks/useTools";
 
 const hotSearchKeywords = [
   { label: "OpenClaw专区", href: "/lobster" },
+  { label: "Skills市场", href: "https://clawhub.ai/", external: true },
   { label: "AI绘画", href: "/categories/ai-drawing" },
   { label: "AI文案", href: "/categories/ai-writing" },
   { label: "AI视频", href: "/categories/ai-video" },
@@ -120,13 +122,27 @@ export function HomePageClient() {
 
           <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
             {hotSearchKeywords.map((keyword) => (
-              <Link
-                key={keyword.label}
-                href={keyword.href}
-                className="rounded-full border border-line/70 bg-white/85 px-4 py-2 text-sm font-medium text-foreground/70 transition hover:-translate-y-0.5 hover:border-brand/30 hover:text-brand"
-              >
-                {keyword.label}
-              </Link>
+              keyword.external ? (
+                <a
+                  key={keyword.label}
+                  href={keyword.href}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-brand/16 bg-brand/8 px-4 py-2 text-sm font-medium text-foreground/76 transition hover:-translate-y-0.5 hover:border-brand/34 hover:bg-brand/12 hover:text-brand"
+                >
+                  <Store className="h-4 w-4" />
+                  {keyword.label}
+                  <ArrowUpRight className="h-3.5 w-3.5" />
+                </a>
+              ) : (
+                <Link
+                  key={keyword.label}
+                  href={keyword.href}
+                  className="rounded-full border border-line/70 bg-white/85 px-4 py-2 text-sm font-medium text-foreground/70 transition hover:-translate-y-0.5 hover:border-brand/30 hover:text-brand"
+                >
+                  {keyword.label}
+                </Link>
+              )
             ))}
           </div>
         </div>
