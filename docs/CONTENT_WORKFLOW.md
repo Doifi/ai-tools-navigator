@@ -28,6 +28,31 @@
 - 首页、分类页、工具详情页会读取到新工具
 - 如果 `is_sponsored = true`，首页精选工具会优先展示
 
+## 录入方式 A-2：批量同步官方工具
+
+适合把站内内置的精选工具一次性写入真实数据库，避免前台长期依赖 mock fallback。
+
+命令：
+
+```bash
+npm run sync:official-tools
+```
+
+当前脚本会同步一批常用工具的真实官网地址和基础资料，包括：
+
+- ChatGPT
+- Claude
+- Midjourney
+- Runway
+- Cursor
+- GitHub Copilot
+- ElevenLabs
+- Suno
+- Notion AI
+- Perplexity
+- Jasper
+- Canva Magic Design
+
 ## 录入方式 B：用户投稿后审核
 
 适合开放投稿运营。
@@ -80,4 +105,3 @@
 ### 分类数量
 
 按 `tools` 表的真实发布数据统计
-
