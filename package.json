@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "sync:official-tools": "node scripts/sync-official-tools.mjs"
+    "sync:official-tools": "node scripts/sync-official-tools.mjs",
+    "sync:openclaw-posts": "node scripts/sync-openclaw-posts.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
