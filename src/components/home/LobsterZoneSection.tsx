@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BookOpenText, Download, PlayCircle, Wrench } from "lucide-react";
+import { ArrowRight, BookOpenText, Download, PlayCircle, Store, Wrench } from "lucide-react";
 
 import { lobsterZone } from "@/lib/lobster";
 
@@ -53,6 +53,32 @@ export function LobsterZoneSection() {
               查看官方入口
             </Link>
           </div>
+
+          <a
+            href={lobsterZone.skillsMarket.href}
+            target="_blank"
+            rel="noreferrer"
+            className="group mt-6 flex max-w-sm items-start gap-4 rounded-[1.5rem] border border-line/70 bg-white/86 p-4 shadow-soft transition duration-300 hover:-translate-y-1 hover:border-brand/35 hover:shadow-glow"
+          >
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-brand/10 text-brand">
+              <Store className="h-5 w-5" />
+            </div>
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-foreground/42">
+                {lobsterZone.skillsMarket.eyebrow}
+              </p>
+              <h3 className="mt-2 font-display text-xl font-semibold text-foreground">
+                {lobsterZone.skillsMarket.title}
+              </h3>
+              <p className="mt-2 text-sm leading-6 text-foreground/64">
+                {lobsterZone.skillsMarket.description}
+              </p>
+              <div className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-brand">
+                {lobsterZone.skillsMarket.cta}
+                <ArrowRight className="h-4 w-4 transition group-hover:translate-x-0.5" />
+              </div>
+            </div>
+          </a>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">

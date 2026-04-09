@@ -7,6 +7,14 @@ export interface LobsterGuideCard {
   cta: string;
 }
 
+export interface LobsterExternalCard {
+  title: string;
+  eyebrow: string;
+  description: string;
+  href: string;
+  cta: string;
+}
+
 export interface LobsterOfficialLink {
   label: string;
   href: string;
@@ -75,6 +83,13 @@ export const lobsterZone = {
   subtitle: "把 OpenClaw 的官方主页、系统要求、安装方式、配置方法、首轮使用、频道文档和 FAQ 集中到一个真实入口。",
   description:
     "本专区全部内容都以 OpenClaw 官方主页、官方 Getting Started、官方 Channels 文档、官方 Commands 文档、官方 FAQ 和官方 GitHub 仓库为准，避免继续使用泛化介绍或失效占位链接。",
+  skillsMarket: {
+    title: "Skills市场",
+    eyebrow: "Skills Market",
+    description: "直达 ClawHub 官方技能市场，查看 OpenClaw 公开技能生态与上架内容。",
+    href: "https://clawhub.ai/",
+    cta: "打开 Skills 市场"
+  } satisfies LobsterExternalCard,
   verificationNote:
     "当前页面内容已于 2026-04-09 对照官方公开文档和官方仓库核对，可继续点击各来源链接追溯原始说明。",
   heroBadges: ["官方主页", "系统要求", "安装 / 配置", "首聊 / 频道 / FAQ"],
