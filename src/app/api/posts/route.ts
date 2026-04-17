@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
 import { queryMockApiPosts } from "@/lib/mock/api-fallback";
-import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_LIMIT = 9;
@@ -37,12 +36,12 @@ export async function GET(request: Request) {
     toolId
   });
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasReadableSupabaseEnv()) {
     return NextResponse.json(fallbackPayload);
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createReadableSupabaseClient();
     let query = supabase
       .from("posts")
       .select("*, categories(*)", { count: "exact" })

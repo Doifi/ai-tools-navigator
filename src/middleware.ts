@@ -4,7 +4,13 @@ import { NextResponse } from "next/server";
 import { ADMIN_SESSION_COOKIE, verifyAdminSession } from "@/lib/admin-auth";
 
 function isPublicAdminPath(pathname: string) {
-  return pathname === "/admin/login" || pathname === "/api/admin/login";
+  if (pathname === "/admin/login" || pathname === "/api/admin/login") {
+    return true;
+  }
+
+  return (
+    process.env.VERCEL_ENV === "preview" && pathname === "/api/admin/tools/sync-official"
+  );
 }
 
 export async function middleware(request: NextRequest) {

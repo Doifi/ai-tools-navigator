@@ -66,7 +66,7 @@ export function getMockApiTools(): ApiTool[] {
       logo_url: null,
       website_url: tool.website,
       category_id: category?.id ?? null,
-      tags: tool.tags,
+      tags: ["海外", ...tool.tags],
       price_model: toPriceModel(tool.priceModel),
       api_available: tool.apiAvailable,
       features: tool.tags,
@@ -123,6 +123,7 @@ interface MockToolsQuery {
   limit: number;
   categoryId?: string | null;
   tag?: string | null;
+  market?: string | null;
   query?: string | null;
   sort?: string | null;
   priceModel?: Enums<"price_model"> | null;
@@ -134,6 +135,7 @@ export function queryMockApiTools({
   limit,
   categoryId,
   tag,
+  market,
   query,
   sort,
   priceModel,
@@ -159,6 +161,14 @@ export function queryMockApiTools({
 
   if (tag) {
     tools = tools.filter((tool) => tool.tags?.includes(tag));
+  }
+
+  if (market === "china") {
+    tools = tools.filter((tool) => tool.tags?.includes("国内"));
+  }
+
+  if (market === "global") {
+    tools = tools.filter((tool) => tool.tags?.includes("海外"));
   }
 
   if (query) {

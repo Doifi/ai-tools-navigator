@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Eye,
   MousePointerClick,
+  RefreshCw,
   Save,
   Search,
   Settings2,
@@ -139,6 +140,7 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
   const [selectedId, setSelectedId] = useState<string | null>(tools[0]?.id ?? null);
   const [formState, setFormState] = useState<ToolFormState>(mapToolToForm(tools[0] ?? null));
   const [isSaving, setIsSaving] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -234,6 +236,46 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
     }
   };
 
+  const handleSyncOfficialTools = async () => {
+    setIsSyncing(true);
+    setError(null);
+    setFeedback(null);
+
+    try {
+      const response = await fetch("/api/admin/tools/sync-official", {
+        method: "POST"
+      });
+
+      const payload = (await response.json().catch(() => null)) as
+        | {
+            error?: string;
+            message?: string;
+            sync?: {
+              total: number;
+              inserted: number;
+              updated: number;
+            };
+          }
+        | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "同步失败");
+      }
+
+      const sync = payload?.sync;
+      setFeedback(
+        sync
+          ? `${payload?.message ?? "同步完成"} · 新增 ${sync.inserted} 个，更新 ${sync.updated} 个`
+          : payload?.message ?? "同步完成"
+      );
+      router.refresh();
+    } catch (syncError) {
+      setError(syncError instanceof Error ? syncError.message : "同步失败");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
   return (
     <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
       <Card className="p-0">
@@ -241,8 +283,22 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
           <p className="eyebrow">Tool Inventory</p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-foreground">工具列表</h2>
           <p className="mt-3 text-sm leading-7 text-foreground/64">
-            共 {tools.length} 个工具，可直接修改基础信息和赞助状态。
+            共 {tools.length} 个工具，可直接修改基础信息和赞助状态，也可以一键同步官方目录。
           </p>
+
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              leftIcon={
+                <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
+              }
+              loading={isSyncing}
+              onClick={() => void handleSyncOfficialTools()}
+            >
+              同步官方工具目录
+            </Button>
+          </div>
 
           <div className="mt-5 relative">
             <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-foreground/35" />

@@ -12,6 +12,7 @@ interface UseToolsOptions {
   limit?: number;
   category?: string | null;
   tag?: string | null;
+  market?: "china" | "global" | null;
   query?: string | null;
   sort?: ToolsSortValue;
   priceModel?: Enums<"price_model"> | null;
@@ -48,6 +49,10 @@ function buildToolsUrl(options: UseToolsOptions) {
     params.set("tag", options.tag);
   }
 
+  if (options.market) {
+    params.set("market", options.market);
+  }
+
   if (options.query) {
     params.set("q", options.query);
   }
@@ -79,6 +84,7 @@ export function useTools(options: UseToolsOptions = {}) {
     options.category,
     options.enabled,
     options.limit,
+    options.market,
     options.page,
     options.priceModel,
     options.query,

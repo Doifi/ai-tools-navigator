@@ -4,8 +4,7 @@ import {
   getMockApiPostBySlug,
   getMockRelatedToolsForPost
 } from "@/lib/mock/api-fallback";
-import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
 
 interface PostDetailRouteProps {
   params: {
@@ -21,7 +20,7 @@ interface PostDetailRouteProps {
 export async function GET(_request: Request, { params }: PostDetailRouteProps) {
   const fallbackPost = getMockApiPostBySlug(params.slug);
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasReadableSupabaseEnv()) {
     if (!fallbackPost) {
       return NextResponse.json({ error: "Post not found" }, { status: 404 });
     }
@@ -35,7 +34,7 @@ export async function GET(_request: Request, { params }: PostDetailRouteProps) {
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createReadableSupabaseClient();
     const { data, error } = await supabase
       .from("posts")
       .select("*, categories(*)")

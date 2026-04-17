@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ArrowUpRight, Eye, Flame, Layers3, MousePointerClick } from "lucide-react";
+import { ArrowUpRight, Eye, Flame, Globe2, Layers3, MousePointerClick } from "lucide-react";
 
 import { CategoryFilterBar } from "@/components/categories/CategoryFilterBar";
 import type {
@@ -26,6 +26,7 @@ import { useTools } from "@/hooks/useTools";
 import type { Enums } from "@/types/supabase";
 
 const PAGE_SIZE = 12;
+type ToolMarketValue = "all" | "china" | "global";
 
 function toApiSort(sort: CategorySortValue) {
   switch (sort) {
@@ -130,6 +131,7 @@ function ToolListRow({ tool }: { tool: ReturnType<typeof mapApiToolToCard> }) {
 interface ToolsCatalogPageClientProps {
   initialSort?: CategorySortValue;
   initialQuery?: string;
+  initialMarket?: ToolMarketValue;
 }
 
 /**
@@ -137,7 +139,8 @@ interface ToolsCatalogPageClientProps {
  */
 export function ToolsCatalogPageClient({
   initialSort = "hot",
-  initialQuery = ""
+  initialQuery = "",
+  initialMarket = "all"
 }: ToolsCatalogPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -147,6 +150,7 @@ export function ToolsCatalogPageClient({
   const [viewMode, setViewMode] = useState<CategoryViewMode>("grid");
   const [page, setPage] = useState(1);
   const [activeCategorySlug, setActiveCategorySlug] = useState<string>("all");
+  const [activeMarket, setActiveMarket] = useState<ToolMarketValue>(initialMarket);
   const [searchInput, setSearchInput] = useState(initialQuery.trim());
   const [query, setQuery] = useState(initialQuery.trim());
 
@@ -169,6 +173,7 @@ export function ToolsCatalogPageClient({
     page,
     limit: PAGE_SIZE,
     category: activeCategory?.id ?? null,
+    market: activeMarket === "all" ? null : activeMarket,
     query,
     sort: toApiSort(activeSort),
     priceModel: toPriceFilter(activeFilter),
@@ -177,7 +182,7 @@ export function ToolsCatalogPageClient({
 
   useEffect(() => {
     setPage(1);
-  }, [activeFilter, activeSort, activeCategorySlug, query]);
+  }, [activeCategorySlug, activeFilter, activeMarket, activeSort, query]);
 
   useEffect(() => {
     setActiveSort(initialSort);
@@ -188,6 +193,10 @@ export function ToolsCatalogPageClient({
     setSearchInput(normalizedInitialQuery);
     setQuery(normalizedInitialQuery);
   }, [initialQuery]);
+
+  useEffect(() => {
+    setActiveMarket(initialMarket);
+  }, [initialMarket]);
 
   useEffect(() => {
     const nextParams = new URLSearchParams(searchParams.toString());
@@ -204,13 +213,19 @@ export function ToolsCatalogPageClient({
       nextParams.delete("q");
     }
 
+    if (activeMarket === "all") {
+      nextParams.delete("market");
+    } else {
+      nextParams.set("market", activeMarket);
+    }
+
     const nextQueryString = nextParams.toString();
     const currentQueryString = searchParams.toString();
 
     if (nextQueryString !== currentQueryString) {
       router.replace(nextQueryString ? `${pathname}?${nextQueryString}` : pathname, { scroll: false });
     }
-  }, [activeSort, pathname, query, router, searchParams]);
+  }, [activeMarket, activeSort, pathname, query, router, searchParams]);
 
   const toolCards = useMemo(() => tools.map(mapApiToolToCard), [tools]);
   const categoryCards = useMemo(() => categories.map(mapApiCategoryToCard), [categories]);
@@ -257,6 +272,32 @@ export function ToolsCatalogPageClient({
                 </Button>
               </div>
             ) : null}
+
+            <div className="mt-5 flex flex-wrap items-center gap-3">
+              <div className="inline-flex items-center gap-2 text-sm font-semibold text-foreground/62">
+                <Globe2 className="h-4 w-4 text-brand" />
+                地区
+              </div>
+              {[
+                { value: "all", label: "全部地区" },
+                { value: "china", label: "国内工具" },
+                { value: "global", label: "海外工具" }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setActiveMarket(option.value as ToolMarketValue)}
+                  className={cn(
+                    "rounded-full border px-4 py-2 text-sm font-semibold transition",
+                    activeMarket === option.value
+                      ? "border-transparent bg-foreground text-white shadow-soft"
+                      : "border-line/70 bg-white/88 text-foreground/68 hover:border-brand/25 hover:text-brand"
+                  )}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
@@ -392,6 +433,7 @@ export function ToolsCatalogPageClient({
                 setSearchInput("");
                 setQuery("");
                 setActiveFilter("all");
+                setActiveMarket(initialMarket);
                 setActiveSort(initialSort);
                 setActiveCategorySlug("all");
                 setPage(1);

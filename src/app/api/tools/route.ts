@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { queryMockApiTools } from "@/lib/mock/api-fallback";
-import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { queryOfficialApiTools } from "@/lib/official-tools-sync";
+import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
 import type { Enums } from "@/types/supabase";
 
 export const dynamic = "force-dynamic";
@@ -46,28 +45,30 @@ export async function GET(request: Request) {
 
   const categoryId = searchParams.get("category");
   const tag = searchParams.get("tag");
+  const market = searchParams.get("market");
   const sort = searchParams.get("sort") ?? "latest";
   const keyword = normalizeSearchQuery(searchParams.get("q"));
   const priceModel = searchParams.get("price_model") as Enums<"price_model"> | null;
   const apiAvailable = searchParams.get("api_available");
 
-  const fallbackPayload = queryMockApiTools({
+  const fallbackPayload = queryOfficialApiTools({
     page,
     limit,
     categoryId,
     tag,
+    market,
     sort,
     query: keyword,
     priceModel,
     apiAvailable
   });
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasReadableSupabaseEnv()) {
     return NextResponse.json(fallbackPayload);
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createReadableSupabaseClient();
     let toolsQuery = supabase
       .from("tools")
       .select("*, categories(*)", { count: "exact" })
@@ -91,6 +92,14 @@ export async function GET(request: Request) {
 
     if (tag) {
       toolsQuery = toolsQuery.contains("tags", [tag]);
+    }
+
+    if (market === "china") {
+      toolsQuery = toolsQuery.contains("tags", ["国内"]);
+    }
+
+    if (market === "global") {
+      toolsQuery = toolsQuery.contains("tags", ["海外"]);
     }
 
     if (keyword) {

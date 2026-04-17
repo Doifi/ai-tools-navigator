@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 
+import { ensureAdminRequest } from "@/lib/admin-route";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { adminCreateToolSchema } from "@/lib/admin/tool-form-schema";
 
@@ -9,6 +10,12 @@ import { adminCreateToolSchema } from "@/lib/admin/tool-form-schema";
  * Creates a published or draft tool directly from the admin panel.
  */
 export async function POST(request: Request) {
+  const unauthorizedResponse = await ensureAdminRequest();
+
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
+  }
+
   try {
     const payload = await request.json();
     const parsed = adminCreateToolSchema.safeParse(payload);

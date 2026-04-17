@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getMockApiToolById } from "@/lib/mock/api-fallback";
-import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getOfficialApiToolById } from "@/lib/official-tools-sync";
+import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
 
 interface ToolDetailRouteProps {
   params: {
@@ -16,9 +15,9 @@ interface ToolDetailRouteProps {
  */
 export async function GET(_request: Request, { params }: ToolDetailRouteProps) {
   const identifier = params.id.trim();
-  const fallbackTool = getMockApiToolById(identifier);
+  const fallbackTool = getOfficialApiToolById(identifier);
 
-  if (!hasPublicSupabaseEnv()) {
+  if (!hasReadableSupabaseEnv()) {
     if (!fallbackTool) {
       return NextResponse.json({ error: "Tool not found" }, { status: 404 });
     }
@@ -27,7 +26,7 @@ export async function GET(_request: Request, { params }: ToolDetailRouteProps) {
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createReadableSupabaseClient();
     const { data, error } = await supabase
       .from("tools")
       .select("*, categories(*)")

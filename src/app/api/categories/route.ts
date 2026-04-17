@@ -1,8 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { getMockApiCategories } from "@/lib/mock/api-fallback";
-import { hasPublicSupabaseEnv } from "@/lib/supabase/env";
-import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getOfficialApiCategories } from "@/lib/official-tools-sync";
+import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
 import type { Tables } from "@/types/supabase";
 
 export const dynamic = "force-dynamic";
@@ -18,12 +17,12 @@ type CategoryWithToolsCount = Tables<"categories"> & {
  * Returns categories with tool counts. Falls back to mock data when Supabase is not configured.
  */
 export async function GET() {
-  if (!hasPublicSupabaseEnv()) {
-    return NextResponse.json({ categories: getMockApiCategories() });
+  if (!hasReadableSupabaseEnv()) {
+    return NextResponse.json({ categories: getOfficialApiCategories() });
   }
 
   try {
-    const supabase = createServerSupabaseClient();
+    const supabase = createReadableSupabaseClient();
     const { data, error } = await supabase
       .from("categories")
       .select("*, tools:tools(count)")
@@ -42,6 +41,6 @@ export async function GET() {
     return NextResponse.json({ categories });
   } catch (error) {
     console.error("Categories API error:", error);
-    return NextResponse.json({ categories: getMockApiCategories() });
+    return NextResponse.json({ categories: getOfficialApiCategories() });
   }
 }

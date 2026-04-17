@@ -11,7 +11,7 @@ export function hasPublicSupabaseEnv() {
  * Admin Supabase environment variables required by privileged admin actions.
  */
 export function hasAdminSupabaseEnv() {
-  return Boolean(hasPublicSupabaseEnv() && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 }
 
 export default hasPublicSupabaseEnv;

@@ -5,6 +5,8 @@ const viewStep = 4200;
 function buildTool(tool, index) {
   const views = Math.max(36000, baseViews - index * viewStep);
   const clickRate = tool.isSponsored ? 0.34 : tool.apiAvailable ? 0.31 : 0.27;
+  const marketTag = tool.market === "china" ? "国内" : "海外";
+  const tags = Array.from(new Set([marketTag, ...(tool.tags ?? [])]));
 
   return {
     sponsorPlan: null,
@@ -12,6 +14,7 @@ function buildTool(tool, index) {
     apiAvailable: false,
     priceModel: "freemium",
     ...tool,
+    tags,
     publishedAt:
       tool.publishedAt ??
       new Date(basePublishedAt.getTime() - index * 6 * 60 * 60 * 1000).toISOString(),
@@ -651,6 +654,436 @@ const baseTools = [
       "WHEE 面向图片生成和视觉创意表达，适合海报、电商图和轻量设计类内容生产。",
     tags: ["AI绘图", "视觉创作", "美图系"],
     features: ["图片生成", "视觉风格", "创意出图"]
+  },
+  {
+    market: "global",
+    name: "Poe",
+    slug: "poe",
+    websiteUrl: "https://poe.com/",
+    categorySlug: "ai-productivity",
+    description: "聚合多模型和机器人社区的 AI 对话平台。",
+    detailedIntro:
+      "Poe 适合在一个入口里体验多家模型、机器人广场和不同类型的 AI 聊天场景。",
+    tags: ["多模型", "机器人广场", "AI聊天"],
+    features: ["模型聚合", "机器人市场", "多端对话"]
+  },
+  {
+    market: "global",
+    name: "Character.AI",
+    slug: "character-ai",
+    websiteUrl: "https://character.ai/",
+    categorySlug: "ai-productivity",
+    description: "主打角色对话和陪伴式交互的 AI 聊天平台。",
+    detailedIntro:
+      "Character.AI 适合角色聊天、IP 互动和轻娱乐式对话体验，是角色 AI 赛道代表产品之一。",
+    tags: ["角色对话", "陪伴互动", "AI聊天"],
+    features: ["角色互动", "角色创建", "多轮对话"]
+  },
+  {
+    market: "global",
+    name: "Mistral Le Chat",
+    slug: "mistral-le-chat",
+    websiteUrl: "https://chat.mistral.ai/chat",
+    categorySlug: "ai-productivity",
+    description: "Mistral 旗下通用 AI 助手，适合快速问答和文档处理。",
+    detailedIntro:
+      "Le Chat 是 Mistral 面向终端用户的产品入口，适合日常问答、写作和资料处理。",
+    tags: ["通用助手", "文档处理", "欧洲模型"],
+    features: ["多轮问答", "文档总结", "通用创作"],
+    apiAvailable: true
+  },
+  {
+    market: "china",
+    name: "WPS AI",
+    slug: "wps-ai",
+    websiteUrl: "https://ai.wps.cn/",
+    categorySlug: "ai-productivity",
+    description: "金山办公旗下 AI 办公入口，覆盖写作、表格、阅读和 PPT。",
+    detailedIntro:
+      "WPS AI 面向办公文档场景，适合做写作、表格处理、文档阅读和 PPT 生成。",
+    tags: ["办公套件", "文档处理", "PPT生成"],
+    features: ["AI写作", "AI表格", "AI阅读"]
+  },
+  {
+    market: "china",
+    name: "WPS灵犀",
+    slug: "wps-lingxi",
+    websiteUrl: "https://lingxi.wps.cn/",
+    categorySlug: "ai-productivity",
+    description: "WPS 推出的 AI 办公助手，强调问答、知识和办公协同。",
+    detailedIntro:
+      "WPS灵犀适合知识检索、办公问答和日常工作协作，是金山办公的 AI 助手产品。",
+    tags: ["办公助手", "知识问答", "金山系"],
+    features: ["知识问答", "办公协作", "工作总结"]
+  },
+  {
+    market: "china",
+    name: "腾讯ima",
+    slug: "tencent-ima",
+    websiteUrl: "https://ima.qq.com/",
+    categorySlug: "ai-productivity",
+    description: "腾讯的 AI 工作台与知识库产品。",
+    detailedIntro:
+      "腾讯ima 适合知识库问答、资料管理和个人工作台场景，是腾讯新的 AI 办公入口。",
+    tags: ["知识库", "工作台", "腾讯系"],
+    features: ["知识库问答", "资料管理", "AI工作台"]
+  },
+  {
+    market: "china",
+    name: "纳米AI搜索",
+    slug: "nano-ai-search",
+    websiteUrl: "https://www.n.cn/",
+    categorySlug: "ai-productivity",
+    description: "主打搜索与问答整合的国内 AI 搜索产品。",
+    detailedIntro:
+      "纳米AI搜索适合做联网问答、资料检索和信息汇总，是国内搜索型 AI 工具之一。",
+    tags: ["AI搜索", "联网问答", "信息整合"],
+    features: ["搜索问答", "内容汇总", "结果整理"]
+  },
+  {
+    market: "china",
+    name: "扣子",
+    slug: "coze",
+    websiteUrl: "https://www.coze.cn/",
+    categorySlug: "ai-productivity",
+    description: "字节系 AI 办公与智能体平台。",
+    detailedIntro:
+      "扣子提供 AI 写作、PPT、表格、设计和智能体能力，适合办公与自动化场景。",
+    tags: ["智能体平台", "办公助手", "字节系"],
+    features: ["智能体创建", "办公生成", "工作流自动化"],
+    apiAvailable: true
+  },
+  {
+    market: "china",
+    name: "腾讯元器",
+    slug: "tencent-yuanqi",
+    websiteUrl: "https://yuanqi.tencent.com/",
+    categorySlug: "ai-productivity",
+    description: "腾讯的智能体创建与分发平台。",
+    detailedIntro:
+      "腾讯元器适合搭建公众号助手、品牌客服、专家顾问和各类企业智能体应用。",
+    tags: ["智能体平台", "企业助手", "分发平台"],
+    features: ["智能体创建", "知识库接入", "多场景分发"]
+  },
+  {
+    market: "global",
+    name: "DeepL Write",
+    slug: "deepl-write",
+    websiteUrl: "https://www.deepl.com/write",
+    categorySlug: "ai-writing",
+    description: "面向多语言改写与润色的 AI 写作助手。",
+    detailedIntro:
+      "DeepL Write 擅长英语和多语言文本改写、润色和表达优化，适合国际化办公场景。",
+    tags: ["多语言写作", "润色改写", "国际办公"],
+    features: ["文本润色", "改写优化", "多语言支持"]
+  },
+  {
+    market: "global",
+    name: "Copy.ai",
+    slug: "copy-ai",
+    websiteUrl: "https://www.copy.ai/",
+    categorySlug: "ai-writing",
+    description: "面向营销和销售流程的 AI 文案平台。",
+    detailedIntro:
+      "Copy.ai 适合 GTM、销售外联、营销文案和团队工作流自动化场景。",
+    tags: ["营销文案", "销售流程", "GTM"],
+    features: ["文案生成", "工作流自动化", "营销协作"],
+    apiAvailable: true
+  },
+  {
+    market: "global",
+    name: "Writesonic",
+    slug: "writesonic",
+    websiteUrl: "https://writesonic.com/",
+    categorySlug: "ai-writing",
+    description: "兼顾内容生成与 AI 搜索优化的写作平台。",
+    detailedIntro:
+      "Writesonic 适合博客、落地页、SEO 内容和多渠道营销文案生产。",
+    tags: ["SEO写作", "内容生成", "营销文案"],
+    features: ["长文写作", "SEO内容", "营销生成"]
+  },
+  {
+    market: "global",
+    name: "Sudowrite",
+    slug: "sudowrite",
+    websiteUrl: "https://www.sudowrite.com/",
+    categorySlug: "ai-writing",
+    description: "偏小说和创意写作的 AI 助手。",
+    detailedIntro:
+      "Sudowrite 面向小说作者和故事创作者，适合情节拓展、角色设定和长篇写作辅助。",
+    tags: ["小说写作", "故事创作", "角色设定"],
+    features: ["剧情扩展", "角色生成", "创意写作"],
+    priceModel: "paid"
+  },
+  {
+    market: "china",
+    name: "笔灵AI",
+    slug: "biling-ai",
+    websiteUrl: "https://ibiling.cn/",
+    categorySlug: "ai-writing",
+    description: "国内写作与论文场景较强的 AI 写作助手。",
+    detailedIntro:
+      "笔灵AI 覆盖论文、报告、PPT、自述稿和小说等场景，适合学生与职场写作需求。",
+    tags: ["论文助手", "写作工具", "PPT生成"],
+    features: ["AI写作", "论文辅助", "答辩PPT"]
+  },
+  {
+    market: "global",
+    name: "v0",
+    slug: "v0",
+    websiteUrl: "https://v0.dev/",
+    categorySlug: "ai-coding",
+    description: "Vercel 推出的 AI 应用与前端生成工具。",
+    detailedIntro:
+      "v0 适合用自然语言生成页面、应用和组件，尤其适合前端原型和快速发布场景。",
+    tags: ["前端生成", "应用搭建", "Vercel"],
+    features: ["界面生成", "应用生成", "即时部署"]
+  },
+  {
+    market: "global",
+    name: "Lovable",
+    slug: "lovable",
+    websiteUrl: "https://lovable.dev/",
+    categorySlug: "ai-coding",
+    description: "对话式构建 Web 应用的 AI Builder。",
+    detailedIntro:
+      "Lovable 面向产品原型和小型应用开发，强调从自然语言到可运行页面的快速生成。",
+    tags: ["应用生成", "原型开发", "Web Builder"],
+    features: ["对话建站", "应用原型", "快速交付"]
+  },
+  {
+    market: "global",
+    name: "Phind",
+    slug: "phind",
+    websiteUrl: "https://www.phind.com/",
+    categorySlug: "ai-coding",
+    description: "专注开发问答和实现思路的 AI 搜索工具。",
+    detailedIntro:
+      "Phind 适合开发者搜索技术答案、实现方案和代码思路，是程序员常见的 AI 搜索入口。",
+    tags: ["开发问答", "技术搜索", "程序员工具"],
+    features: ["技术搜索", "代码问答", "实现建议"]
+  },
+  {
+    market: "global",
+    name: "CodeRabbit",
+    slug: "coderabbit",
+    websiteUrl: "https://www.coderabbit.ai/",
+    categorySlug: "ai-coding",
+    description: "面向代码审查的 AI 工具，强调发现缺陷和审查提效。",
+    detailedIntro:
+      "CodeRabbit 聚焦 PR 代码审查、问题发现和修复建议，适合工程团队提高 Review 质量。",
+    tags: ["代码审查", "PR Review", "质量检测"],
+    features: ["AI审查", "问题发现", "修复建议"]
+  },
+  {
+    market: "global",
+    name: "Devin",
+    slug: "devin",
+    websiteUrl: "https://devin.ai/",
+    categorySlug: "ai-coding",
+    description: "以 AI 软件工程师定位出圈的 Agent 编程产品。",
+    detailedIntro:
+      "Devin 强调任务执行、编程代理和工程协作，适合关注 Agent 编程和自动执行的团队。",
+    tags: ["AI工程师", "编程代理", "任务执行"],
+    features: ["任务代理", "工程协作", "自动执行"]
+  },
+  {
+    market: "global",
+    name: "Ideogram",
+    slug: "ideogram",
+    websiteUrl: "https://ideogram.ai/",
+    categorySlug: "ai-drawing",
+    description: "擅长文字排版和海报视觉的 AI 出图工具。",
+    detailedIntro:
+      "Ideogram 适合带字海报、概念图和社媒视觉，是图像生成里排版表现较强的一类工具。",
+    tags: ["海报设计", "文字排版", "AI出图"],
+    features: ["带字海报", "图像生成", "创意视觉"]
+  },
+  {
+    market: "global",
+    name: "Adobe Firefly",
+    slug: "adobe-firefly",
+    websiteUrl: "https://firefly.adobe.com/",
+    categorySlug: "ai-drawing",
+    description: "Adobe 旗下生成式视觉创作工具。",
+    detailedIntro:
+      "Adobe Firefly 面向品牌视觉、图片编辑和创意资产生产，适合 Adobe 生态用户。",
+    tags: ["Adobe生态", "创意出图", "图片编辑"],
+    features: ["图像生成", "创意填充", "品牌视觉"],
+    apiAvailable: true
+  },
+  {
+    market: "global",
+    name: "Clipdrop",
+    slug: "clipdrop",
+    websiteUrl: "https://clipdrop.co/",
+    categorySlug: "ai-drawing",
+    description: "偏图像处理和视觉修图的 AI 工具集。",
+    detailedIntro:
+      "Clipdrop 适合做抠图、修图、图片放大和创意图像处理，是设计师常见的视觉辅助工具。",
+    tags: ["抠图修图", "图片处理", "视觉工具"],
+    features: ["抠图", "图片放大", "修图增强"],
+    apiAvailable: true
+  },
+  {
+    market: "global",
+    name: "Recraft",
+    slug: "recraft",
+    websiteUrl: "https://www.recraft.ai/",
+    categorySlug: "ai-design",
+    description: "偏设计师工作流的 AI 视觉设计工具。",
+    detailedIntro:
+      "Recraft 适合图标、海报、品牌视觉和素材生成，强调设计可控性与团队协作。",
+    tags: ["设计生成", "品牌视觉", "图标素材"],
+    features: ["设计资产", "图标生成", "品牌图形"],
+    apiAvailable: true
+  },
+  {
+    market: "global",
+    name: "Beautiful.ai",
+    slug: "beautiful-ai",
+    websiteUrl: "https://www.beautiful.ai/",
+    categorySlug: "ai-design",
+    description: "强调自动排版和商业汇报场景的演示工具。",
+    detailedIntro:
+      "Beautiful.ai 适合商业汇报、销售提案和团队演示，主打自动布局和内容美化。",
+    tags: ["演示文稿", "自动排版", "商业提案"],
+    features: ["PPT生成", "自动布局", "演示美化"],
+    priceModel: "paid"
+  },
+  {
+    market: "global",
+    name: "Framer AI",
+    slug: "framer-ai",
+    websiteUrl: "https://www.framer.com/ai/",
+    categorySlug: "ai-design",
+    description: "将文案直接转成网站页面的 AI 建站设计工具。",
+    detailedIntro:
+      "Framer AI 适合营销页面、作品集和品牌站点的快速搭建，强调设计与发布一体化。",
+    tags: ["AI建站", "落地页", "设计发布"],
+    features: ["网站生成", "页面设计", "即时发布"]
+  },
+  {
+    market: "global",
+    name: "Miro AI",
+    slug: "miro-ai",
+    websiteUrl: "https://miro.com/ai/",
+    categorySlug: "ai-design",
+    description: "协作白板里的 AI 助手，适合脑暴、流程图和提案整理。",
+    detailedIntro:
+      "Miro AI 服务于协作白板和可视化工作流场景，适合团队做提案、脑暴和结构梳理。",
+    tags: ["协作白板", "脑暴整理", "流程图"],
+    features: ["内容整理", "思维导图", "协作白板"]
+  },
+  {
+    market: "global",
+    name: "PhotoRoom",
+    slug: "photoroom",
+    websiteUrl: "https://www.photoroom.com/",
+    categorySlug: "ai-design",
+    description: "适合电商和社媒素材制作的 AI 图片设计工具。",
+    detailedIntro:
+      "PhotoRoom 适合商品图抠图、背景替换和社媒视觉快速生产，是电商常见设计工具。",
+    tags: ["电商设计", "商品图", "抠图换背景"],
+    features: ["商品图生成", "背景替换", "素材制作"],
+    apiAvailable: true
+  },
+  {
+    market: "china",
+    name: "LiblibAI",
+    slug: "liblib-ai",
+    websiteUrl: "https://www.liblib.art/",
+    categorySlug: "ai-drawing",
+    description: "国内领先的 AI 图像创作与模型社区平台。",
+    detailedIntro:
+      "LiblibAI 适合模型探索、出图创作和社区交流，是国内 AI 绘画生态的重要平台。",
+    tags: ["模型社区", "AI绘画", "创作平台"],
+    features: ["模型社区", "图像生成", "创作广场"]
+  },
+  {
+    market: "china",
+    name: "通义万相",
+    slug: "tongyi-wanxiang",
+    websiteUrl: "https://tongyi.aliyun.com/wanxiang/",
+    categorySlug: "ai-drawing",
+    description: "阿里通义旗下图像与视频生成产品。",
+    detailedIntro:
+      "通义万相覆盖图片和视频创作，适合做品牌视觉、海报和创意素材生成。",
+    tags: ["阿里系", "图像生成", "视频生成"],
+    features: ["图片生成", "视频生成", "创意素材"]
+  },
+  {
+    market: "china",
+    name: "讯飞智文",
+    slug: "xfyun-zhiwen",
+    websiteUrl: "https://zhiwen.xfyun.cn/",
+    categorySlug: "ai-design",
+    description: "讯飞的 AI PPT 与文档生成工具。",
+    detailedIntro:
+      "讯飞智文适合 PPT、Word 和汇报材料生成，是国内办公演示类工具的代表之一。",
+    tags: ["PPT生成", "Word生成", "办公汇报"],
+    features: ["PPT生成", "文档生成", "智能排版"]
+  },
+  {
+    market: "global",
+    name: "InVideo AI",
+    slug: "invideo-ai",
+    websiteUrl: "https://invideo.io/ai/",
+    categorySlug: "ai-video",
+    description: "面向营销和社媒场景的视频生成平台。",
+    detailedIntro:
+      "InVideo AI 适合做营销视频、广告视频和社媒内容，强调模板和快速成片。",
+    tags: ["营销视频", "社媒内容", "模板成片"],
+    features: ["视频生成", "模板视频", "营销成片"]
+  },
+  {
+    market: "global",
+    name: "Luma Dream Machine",
+    slug: "luma-dream-machine",
+    websiteUrl: "https://lumalabs.ai/dream-machine",
+    categorySlug: "ai-video",
+    description: "Luma 推出的高质量 AI 视频生成工具。",
+    detailedIntro:
+      "Dream Machine 适合做高动态镜头、创意短片和概念视频，是视频生成赛道的重要产品。",
+    tags: ["AI视频", "镜头动态", "概念短片"],
+    features: ["视频生成", "动态镜头", "创意短片"]
+  },
+  {
+    market: "global",
+    name: "Captions",
+    slug: "captions",
+    websiteUrl: "https://captions.ai/",
+    categorySlug: "ai-video",
+    description: "适合口播视频、字幕和社媒视频编辑的 AI 工具。",
+    detailedIntro:
+      "Captions 擅长口播视频、字幕、剪辑和社媒内容生成，是创作者工具链中的高频产品。",
+    tags: ["口播视频", "字幕生成", "社媒编辑"],
+    features: ["自动字幕", "口播视频", "视频编辑"]
+  },
+  {
+    market: "global",
+    name: "Descript",
+    slug: "descript",
+    websiteUrl: "https://www.descript.com/",
+    categorySlug: "ai-audio",
+    description: "播客、配音和音视频编辑一体化工具。",
+    detailedIntro:
+      "Descript 适合播客制作、配音、采访剪辑和音视频协同编辑，是内容团队常见工具。",
+    tags: ["播客制作", "音频编辑", "视频协同"],
+    features: ["配音剪辑", "播客编辑", "音视频协作"]
+  },
+  {
+    market: "global",
+    name: "Murf AI",
+    slug: "murf-ai",
+    websiteUrl: "https://murf.ai/",
+    categorySlug: "ai-audio",
+    description: "主打商业配音和品牌旁白的 AI 语音工具。",
+    detailedIntro:
+      "Murf AI 适合课程旁白、广告配音、企业培训和品牌语音内容生产。",
+    tags: ["商业配音", "品牌旁白", "语音生成"],
+    features: ["语音合成", "商业配音", "旁白制作"],
+    apiAvailable: true
   }
 ];
 
