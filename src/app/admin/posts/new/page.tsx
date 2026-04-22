@@ -1,13 +1,23 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { AdminEnvNotice } from "@/components/admin/AdminEnvNotice";
 import { AdminCreatePostForm } from "@/components/admin/AdminCreatePostForm";
 import { Container } from "@/components/layout/Container";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { hasAdminSupabaseEnv } from "@/lib/supabase/env";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminNewPostPage() {
+  if (!hasAdminSupabaseEnv()) {
+    return (
+      <Container className="py-10 sm:py-14">
+        <AdminEnvNotice description="当前部署没有注入后台所需的 Supabase 管理变量，所以新建文章页暂时不可用。" />
+      </Container>
+    );
+  }
+
   const supabase = createAdminSupabaseClient();
 
   const [{ data: categories }, { data: tools }] = await Promise.all([

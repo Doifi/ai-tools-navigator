@@ -1,8 +1,10 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
+import { AdminEnvNotice } from "@/components/admin/AdminEnvNotice";
 import { AdminCreateToolForm } from "@/components/admin/AdminCreateToolForm";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
+import { hasAdminSupabaseEnv } from "@/lib/supabase/env";
 import type { Tables } from "@/types/supabase";
 
 export const dynamic = "force-dynamic";
@@ -11,6 +13,12 @@ export const dynamic = "force-dynamic";
  * Direct admin entry page for creating live tools.
  */
 export default async function AdminNewToolPage() {
+  if (!hasAdminSupabaseEnv()) {
+    return (
+      <AdminEnvNotice description="当前部署没有注入后台所需的 Supabase 管理变量，所以新建工具页暂时不可用。" />
+    );
+  }
+
   const supabase = createAdminSupabaseClient();
   const { data: categories, error } = await supabase
     .from("categories")

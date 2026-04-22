@@ -2,6 +2,8 @@ import {
   AdminSubmissionDashboard,
   type AdminSubmissionRecord
 } from "@/components/admin/AdminSubmissionDashboard";
+import { AdminEnvNotice } from "@/components/admin/AdminEnvNotice";
+import { hasAdminSupabaseEnv } from "@/lib/supabase/env";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -10,6 +12,12 @@ export const dynamic = "force-dynamic";
  * Admin dashboard for reviewing tool submissions.
  */
 export default async function AdminPage() {
+  if (!hasAdminSupabaseEnv()) {
+    return (
+      <AdminEnvNotice description="当前部署没有注入后台所需的 Supabase 管理变量，所以工具投稿审核页暂时不可用。" />
+    );
+  }
+
   const supabase = createAdminSupabaseClient();
 
   const { data, error } = await supabase
