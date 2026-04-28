@@ -6,6 +6,7 @@ import { useMemo, useState } from "react";
 import {
   Archive,
   CalendarDays,
+  ExternalLink,
   Eye,
   EyeOff,
   FileEdit,
@@ -13,6 +14,7 @@ import {
   RotateCcw,
   Search,
   Send,
+  ShieldAlert,
   Trash2
 } from "lucide-react";
 
@@ -33,6 +35,11 @@ export type AdminPostRecord = Pick<
 
 interface AdminPostsManagerProps {
   posts: AdminPostRecord[];
+  mode?: "editable" | "readonly";
+  banner?: {
+    title: string;
+    description: string;
+  } | null;
 }
 
 type PostStatusFilter = "all" | "published" | "draft" | "archived";
@@ -83,8 +90,13 @@ type PostActionState =
 /**
  * Admin posts inventory with search, filter, and edit entry.
  */
-export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
+export function AdminPostsManager({
+  posts,
+  mode = "editable",
+  banner = null
+}: AdminPostsManagerProps) {
   const router = useRouter();
+  const isReadonly = mode === "readonly";
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<PostStatusFilter>("all");
   const [actionState, setActionState] = useState<PostActionState>(null);
@@ -118,6 +130,10 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
     nextStatus: "published" | "draft" | "archived",
     action: NonNullable<PostActionState>["action"]
   ) => {
+    if (isReadonly) {
+      return;
+    }
+
     setActionState({ postId: post.id, action });
     setFeedback(null);
     setError(null);
@@ -149,6 +165,10 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
   };
 
   const handleDelete = async (post: AdminPostRecord) => {
+    if (isReadonly) {
+      return;
+    }
+
     const shouldDelete = window.confirm(`确认删除《${post.title}》？删除后无法恢复。`);
 
     if (!shouldDelete) {
@@ -184,6 +204,18 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
 
   return (
     <section className="space-y-8">
+      {banner ? (
+        <div className="rounded-[1.5rem] border border-warning/20 bg-warning/5 px-5 py-4 text-sm text-warning">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+              <p className="font-semibold">{banner.title}</p>
+              <p className="mt-1 leading-7 text-warning/90">{banner.description}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="eyebrow">Editorial Desk</p>
@@ -191,17 +223,25 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
             文章管理
           </h1>
           <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/66">
-            这里可以搜索、筛选和编辑已有文章，用于持续维护教程、资讯和专题内容。
+            {isReadonly
+              ? "当前展示站内文章快照，可搜索、筛选和跳转前台查看内容。"
+              : "这里可以搜索、筛选和编辑已有文章，用于持续维护教程、资讯和专题内容。"}
           </p>
         </div>
 
-        <Link
-          href="/admin/posts/new"
-          className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
-        >
-          <Plus className="h-4 w-4" />
-          新建文章
-        </Link>
+        {isReadonly ? (
+          <span className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 bg-background px-6 text-sm font-semibold text-foreground/58">
+            只读模式
+          </span>
+        ) : (
+          <Link
+            href="/admin/posts/new"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
+          >
+            <Plus className="h-4 w-4" />
+            新建文章
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-5 md:grid-cols-3">
@@ -318,7 +358,7 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
                 </div>
 
                 <div className="flex shrink-0 flex-wrap gap-3">
-                  {post.status === "published" ? (
+                  {!isReadonly && post.status === "published" ? (
                     <Link
                       href={`/posts/${post.slug}`}
                       className="inline-flex h-11 items-center justify-center rounded-full border border-line/70 px-5 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:text-brand"
@@ -327,20 +367,22 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
                     </Link>
                   ) : null}
 
-                  <Button
-                    type="button"
-                    size="md"
-                    variant="outline"
-                    loading={isWorking && actionState?.action === primaryAction.action}
-                    leftIcon={primaryAction.icon}
-                    onClick={() =>
-                      void handleStatusChange(post, primaryAction.nextStatus, primaryAction.action)
-                    }
-                  >
-                    {primaryAction.label}
-                  </Button>
+                  {!isReadonly ? (
+                    <Button
+                      type="button"
+                      size="md"
+                      variant="outline"
+                      loading={isWorking && actionState?.action === primaryAction.action}
+                      leftIcon={primaryAction.icon}
+                      onClick={() =>
+                        void handleStatusChange(post, primaryAction.nextStatus, primaryAction.action)
+                      }
+                    >
+                      {primaryAction.label}
+                    </Button>
+                  ) : null}
 
-                  {post.status !== "archived" ? (
+                  {!isReadonly && post.status !== "archived" ? (
                     <Button
                       type="button"
                       size="md"
@@ -353,25 +395,37 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
                     </Button>
                   ) : null}
 
+                  {!isReadonly ? (
+                    <Link
+                      href={`/admin/posts/${post.id}`}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-background/80"
+                    >
+                      <FileEdit className="h-4 w-4" />
+                      编辑文章
+                    </Link>
+                  ) : null}
+
                   <Link
-                    href={`/admin/posts/${post.id}`}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full bg-background px-5 text-sm font-semibold text-foreground transition hover:bg-background/80"
+                    href={`/posts/${post.slug}`}
+                    className="inline-flex h-11 items-center justify-center gap-2 rounded-full border border-line/70 px-5 text-sm font-semibold text-foreground transition hover:border-brand/40 hover:text-brand"
                   >
-                    <FileEdit className="h-4 w-4" />
-                    编辑文章
+                    <ExternalLink className="h-4 w-4" />
+                    阅读文章
                   </Link>
 
-                  <Button
-                    type="button"
-                    size="md"
-                    variant="ghost"
-                    loading={isWorking && actionState?.action === "delete"}
-                    leftIcon={<Trash2 className="h-4 w-4" />}
-                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                    onClick={() => void handleDelete(post)}
-                  >
-                    删除
-                  </Button>
+                  {!isReadonly ? (
+                    <Button
+                      type="button"
+                      size="md"
+                      variant="ghost"
+                      loading={isWorking && actionState?.action === "delete"}
+                      leftIcon={<Trash2 className="h-4 w-4" />}
+                      className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                      onClick={() => void handleDelete(post)}
+                    >
+                      删除
+                    </Button>
+                  ) : null}
                 </div>
               </div>
             </article>
@@ -382,12 +436,14 @@ export function AdminPostsManager({ posts }: AdminPostsManagerProps) {
           <div className="surface-panel p-8 text-center">
             <h2 className="font-display text-2xl font-semibold text-foreground">没有匹配的文章</h2>
             <p className="mt-3 text-sm text-foreground/62">可以换个关键词，或切换状态筛选后再试。</p>
-            <Link
-              href="/admin/posts/new"
-              className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/92"
-            >
-              去新建文章
-            </Link>
+            {!isReadonly ? (
+              <Link
+                href="/admin/posts/new"
+                className="mt-5 inline-flex h-11 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/92"
+              >
+                去新建文章
+              </Link>
+            ) : null}
           </div>
         )}
       </div>
