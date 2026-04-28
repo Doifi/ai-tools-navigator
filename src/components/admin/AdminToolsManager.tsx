@@ -1,14 +1,17 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  ExternalLink,
   Eye,
   MousePointerClick,
   RefreshCw,
   Save,
   Search,
   Settings2,
+  ShieldAlert,
   Sparkles
 } from "lucide-react";
 
@@ -28,6 +31,11 @@ export type AdminToolRecord = Tables<"tools"> & {
 interface AdminToolsManagerProps {
   tools: AdminToolRecord[];
   categories: CategorySummary[];
+  mode?: "editable" | "readonly";
+  banner?: {
+    title: string;
+    description: string;
+  } | null;
 }
 
 type ToolFormState = {
@@ -134,8 +142,14 @@ function statusLabel(value: Enums<"content_status">) {
 /**
  * Admin interface for editing tools and sponsor settings.
  */
-export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps) {
+export function AdminToolsManager({
+  tools,
+  categories,
+  mode = "editable",
+  banner = null
+}: AdminToolsManagerProps) {
   const router = useRouter();
+  const isReadonly = mode === "readonly";
   const [query, setQuery] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(tools[0]?.id ?? null);
   const [formState, setFormState] = useState<ToolFormState>(mapToolToForm(tools[0] ?? null));
@@ -186,7 +200,7 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
   };
 
   const handleSave = async () => {
-    if (!selectedTool) {
+    if (!selectedTool || isReadonly) {
       return;
     }
 
@@ -237,6 +251,10 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
   };
 
   const handleSyncOfficialTools = async () => {
+    if (isReadonly) {
+      return;
+    }
+
     setIsSyncing(true);
     setError(null);
     setFeedback(null);
@@ -277,13 +295,28 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
   };
 
   return (
-    <section className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+    <section className="space-y-5">
+      {banner ? (
+        <div className="rounded-[1.5rem] border border-warning/20 bg-warning/5 px-5 py-4 text-sm text-warning">
+          <div className="flex items-start gap-3">
+            <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0" />
+            <div>
+              <p className="font-semibold">{banner.title}</p>
+              <p className="mt-1 leading-7 text-warning/90">{banner.description}</p>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
+      <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
       <Card className="p-0">
         <div className="border-b border-line/70 p-6">
           <p className="eyebrow">Tool Inventory</p>
           <h2 className="mt-3 font-display text-3xl font-semibold text-foreground">工具列表</h2>
           <p className="mt-3 text-sm leading-7 text-foreground/64">
-            共 {tools.length} 个工具，可直接修改基础信息和赞助状态，也可以一键同步官方目录。
+            {isReadonly
+              ? `当前展示 ${tools.length} 个官方目录快照工具，可搜索和核对官网信息。`
+              : `共 ${tools.length} 个工具，可直接修改基础信息和赞助状态，也可以一键同步官方目录。`}
           </p>
 
           <div className="mt-5 flex flex-wrap gap-3">
@@ -294,9 +327,10 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
                 <RefreshCw className={`h-4 w-4 ${isSyncing ? "animate-spin" : ""}`} />
               }
               loading={isSyncing}
+              disabled={isReadonly}
               onClick={() => void handleSyncOfficialTools()}
             >
-              同步官方工具目录
+              {isReadonly ? "只读模式" : "同步官方工具目录"}
             </Button>
           </div>
 
@@ -378,6 +412,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
             </div>
 
             <div className="flex flex-wrap gap-2">
+              <Badge tone={isReadonly ? "paid" : "plugin"}>
+                {isReadonly ? "官方快照" : "实时数据"}
+              </Badge>
               <Badge tone={selectedTool.is_sponsored ? "new" : "plugin"}>
                 {selectedTool.is_sponsored ? "赞助中" : "普通展示"}
               </Badge>
@@ -387,17 +424,25 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
             </div>
           </div>
 
+          {isReadonly ? (
+            <div className="rounded-[1.25rem] border border-line/70 bg-background/85 px-4 py-3 text-sm leading-7 text-foreground/64">
+              当前数据来自站内官方目录快照。这个页面仍可用于搜索、分类核对、官网跳转和内容检查，实时保存功能会在 Supabase 恢复后启用。
+            </div>
+          ) : null}
+
           <div className="grid gap-5 sm:grid-cols-2">
             <Input
               id="tool-name"
               label="工具名称"
               value={formState.name}
+              disabled={isReadonly}
               onChange={(event) => updateField("name", event.target.value)}
             />
             <Input
               id="tool-slug"
               label="Slug"
               value={formState.slug}
+              disabled={isReadonly}
               onChange={(event) => updateField("slug", event.target.value)}
             />
           </div>
@@ -407,12 +452,14 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               id="tool-website"
               label="官网地址"
               value={formState.websiteUrl}
+              disabled={isReadonly}
               onChange={(event) => updateField("websiteUrl", event.target.value)}
             />
             <Input
               id="tool-logo"
               label="Logo URL"
               value={formState.logoUrl}
+              disabled={isReadonly}
               onChange={(event) => updateField("logoUrl", event.target.value)}
             />
           </div>
@@ -423,8 +470,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
             </label>
             <textarea
               id="tool-description"
-              className="min-h-[120px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+              className="min-h-[120px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
               value={formState.description}
+              disabled={isReadonly}
               onChange={(event) => updateField("description", event.target.value)}
             />
           </div>
@@ -435,8 +483,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
             </label>
             <textarea
               id="tool-intro"
-              className="min-h-[160px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+              className="min-h-[160px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
               value={formState.detailedIntro}
+              disabled={isReadonly}
               onChange={(event) => updateField("detailedIntro", event.target.value)}
             />
           </div>
@@ -448,8 +497,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               </label>
               <select
                 id="tool-category"
-                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                 value={formState.categoryId}
+                disabled={isReadonly}
                 onChange={(event) => updateField("categoryId", event.target.value)}
               >
                 <option value="">未分类</option>
@@ -467,8 +517,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               </label>
               <select
                 id="tool-price-model"
-                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                 value={formState.priceModel}
+                disabled={isReadonly}
                 onChange={(event) =>
                   updateField("priceModel", event.target.value as ToolFormState["priceModel"])
                 }
@@ -486,8 +537,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               </label>
               <select
                 id="tool-status"
-                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                 value={formState.status}
+                disabled={isReadonly}
                 onChange={(event) =>
                   updateField("status", event.target.value as ToolFormState["status"])
                 }
@@ -512,8 +564,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
                   type="button"
                   role="switch"
                   aria-checked={formState.apiAvailable}
+                  disabled={isReadonly}
                   onClick={() => updateField("apiAvailable", !formState.apiAvailable)}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-60 ${
                     formState.apiAvailable ? "bg-brand" : "bg-line"
                   }`}
                 >
@@ -538,8 +591,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
                   type="button"
                   role="switch"
                   aria-checked={formState.isSponsored}
+                  disabled={isReadonly}
                   onClick={() => updateField("isSponsored", !formState.isSponsored)}
-                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition ${
+                  className={`relative inline-flex h-8 w-14 items-center rounded-full transition disabled:cursor-not-allowed disabled:opacity-60 ${
                     formState.isSponsored ? "bg-accent-coral" : "bg-line"
                   }`}
                 >
@@ -561,8 +615,9 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
                   </label>
                   <select
                     id="tool-sponsor-plan"
-                    className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                    className="h-12 w-full rounded-2xl border border-line/80 bg-white/90 px-4 text-sm text-foreground outline-none transition focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                     value={formState.sponsorPlan}
+                    disabled={isReadonly}
                     onChange={(event) =>
                       updateField("sponsorPlan", event.target.value as ToolFormState["sponsorPlan"])
                     }
@@ -584,9 +639,10 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               </label>
               <textarea
                 id="tool-tags"
-                className="min-h-[110px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                className="min-h-[110px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="多个标签用英文逗号分隔"
                 value={formState.tagsText}
+                disabled={isReadonly}
                 onChange={(event) => updateField("tagsText", event.target.value)}
               />
             </div>
@@ -597,9 +653,10 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
               </label>
               <textarea
                 id="tool-features"
-                className="min-h-[110px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10"
+                className="min-h-[110px] w-full rounded-2xl border border-line/80 bg-white/90 px-4 py-3 text-sm text-foreground outline-none transition placeholder:text-foreground/35 focus:border-brand/45 focus:ring-4 focus:ring-brand/10 disabled:cursor-not-allowed disabled:opacity-60"
                 placeholder="每行一个功能点"
                 value={formState.featuresText}
+                disabled={isReadonly}
                 onChange={(event) => updateField("featuresText", event.target.value)}
               />
             </div>
@@ -617,26 +674,39 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
             </div>
           ) : null}
 
-          <div className="flex flex-col gap-3 sm:flex-row">
-            <Button
-              type="button"
-              size="lg"
-              loading={isSaving}
-              leftIcon={<Save className="h-4 w-4" />}
-              onClick={() => void handleSave()}
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+            <Link
+              href={selectedTool.website_url}
+              target="_blank"
+              rel="noreferrer"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line/80 bg-white/90 px-6 text-sm font-semibold text-foreground transition hover:border-brand/35 hover:text-brand"
             >
-              保存修改
-            </Button>
-            <Button
-              type="button"
-              size="lg"
-              variant="outline"
-              leftIcon={<Settings2 className="h-4 w-4" />}
-              onClick={() => setFormState(mapToolToForm(selectedTool))}
-            >
-              恢复当前数据
-            </Button>
-            {formState.isSponsored ? (
+              <ExternalLink className="h-4 w-4" />
+              查看官网
+            </Link>
+            {!isReadonly ? (
+              <Button
+                type="button"
+                size="lg"
+                loading={isSaving}
+                leftIcon={<Save className="h-4 w-4" />}
+                onClick={() => void handleSave()}
+              >
+                保存修改
+              </Button>
+            ) : null}
+            {!isReadonly ? (
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                leftIcon={<Settings2 className="h-4 w-4" />}
+                onClick={() => setFormState(mapToolToForm(selectedTool))}
+              >
+                恢复当前数据
+              </Button>
+            ) : null}
+            {!isReadonly && formState.isSponsored ? (
               <Button
                 type="button"
                 size="lg"
@@ -660,6 +730,7 @@ export function AdminToolsManager({ tools, categories }: AdminToolsManagerProps)
           </div>
         </Card>
       )}
+      </div>
     </section>
   );
 }
