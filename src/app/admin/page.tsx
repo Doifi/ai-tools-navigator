@@ -3,7 +3,6 @@ import {
   type AdminSubmissionRecord
 } from "@/components/admin/AdminSubmissionDashboard";
 import { AdminEnvNotice } from "@/components/admin/AdminEnvNotice";
-import { AdminSupabaseConnectionNotice } from "@/components/admin/AdminSupabaseConnectionNotice";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { hasAdminSupabaseEnv } from "@/lib/supabase/env";
@@ -48,10 +47,15 @@ export default async function AdminPage() {
       />
     );
   } catch (error) {
-    console.error("Admin dashboard page error:", error);
+    console.warn("Admin dashboard switched to fallback status cards:", error);
     return (
       <section className="space-y-6">
-        <AdminSupabaseConnectionNotice description="当前部署已经进入后台，但审核提交页在连接 Supabase 时失败，所以暂时无法读取待审核和历史处理数据。" />
+        <div className="rounded-[1.5rem] border border-warning/20 bg-warning/5 px-5 py-4 text-sm text-warning">
+          <p className="font-semibold">当前为只读快照模式</p>
+          <p className="mt-1 leading-7 text-warning/90">
+            实时数据库暂时不可写。工具管理和文章管理已自动切到快照数据，投稿审核会在 Supabase 恢复后继续可用。
+          </p>
+        </div>
 
         <div className="grid gap-5 lg:grid-cols-3">
           <Card className="space-y-4">

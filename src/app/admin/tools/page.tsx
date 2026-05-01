@@ -1,5 +1,4 @@
 import { AdminEnvNotice } from "@/components/admin/AdminEnvNotice";
-import { AdminSupabaseConnectionNotice } from "@/components/admin/AdminSupabaseConnectionNotice";
 import { AdminToolsManager, type AdminToolRecord } from "@/components/admin/AdminToolsManager";
 import { getOfficialApiCategories, getOfficialApiTools } from "@/lib/official-tools-sync";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
@@ -45,7 +44,7 @@ export default async function AdminToolsPage() {
       />
     );
   } catch (error) {
-    console.error("Admin tools page error:", error);
+    console.warn("Admin tools page switched to read-only fallback:", error);
     const fallbackTools = getOfficialApiTools() as AdminToolRecord[];
     const fallbackCategories = getOfficialApiCategories() as Pick<
       Tables<"categories">,
@@ -53,18 +52,15 @@ export default async function AdminToolsPage() {
     >[];
 
     return (
-      <section className="space-y-6">
-        <AdminSupabaseConnectionNotice description="当前部署已经进入后台，但工具管理页在连接 Supabase 时失败，所以实时工具数据暂时不可读写。下面已经切到站内官方目录快照，只读可查。" />
-        <AdminToolsManager
-          tools={fallbackTools}
-          categories={fallbackCategories}
-          mode="readonly"
-          banner={{
-            title: "已切换到官方目录快照",
-            description: `当前展示 ${fallbackTools.length} 个站内维护的官方工具条目。你可以继续搜索、查看官网、核对分类和标签；实时保存会在 Supabase 恢复后自动回到可编辑模式。`
-          }}
-        />
-      </section>
+      <AdminToolsManager
+        tools={fallbackTools}
+        categories={fallbackCategories}
+        mode="readonly"
+        banner={{
+          title: "当前为只读快照模式",
+          description: `实时数据库暂时不可写，已自动载入 ${fallbackTools.length} 个站内官方工具条目。搜索、官网跳转、分类和标签核对都可以正常使用；连接恢复后会自动回到可编辑模式。`
+        }}
+      />
     );
   }
 }
