@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { LayoutDashboard, Newspaper, Wrench } from "lucide-react";
+import { Activity, LayoutDashboard, Newspaper, Wrench } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
 import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
@@ -28,6 +28,11 @@ const navItems = [
     href: "/admin/tools",
     label: "工具管理",
     icon: Wrench
+  },
+  {
+    href: "/admin/status",
+    label: "系统状态",
+    icon: Activity
   }
 ];
 
