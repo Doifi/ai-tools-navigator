@@ -7,6 +7,7 @@ import {
   ExternalLink,
   Eye,
   MousePointerClick,
+  Plus,
   RefreshCw,
   Save,
   Search,
@@ -308,6 +309,32 @@ export function AdminToolsManager({
         </div>
       ) : null}
 
+      <div className="flex flex-col gap-4 rounded-[1.75rem] border border-line/70 bg-white/86 p-5 shadow-soft sm:flex-row sm:items-center sm:justify-between sm:p-6">
+        <div>
+          <p className="eyebrow">Tool Admin</p>
+          <h1 className="mt-3 font-display text-3xl font-semibold text-foreground sm:text-4xl">
+            工具管理
+          </h1>
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-foreground/64">
+            左侧选择已有工具进行编辑；需要录入新工具时，点击右侧的新增工具进入完整表单。
+          </p>
+        </div>
+
+        {isReadonly ? (
+          <span className="inline-flex h-12 items-center justify-center rounded-full border border-line/70 bg-background px-6 text-sm font-semibold text-foreground/58">
+            只读模式
+          </span>
+        ) : (
+          <Link
+            href="/admin/tools/new"
+            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
+          >
+            <Plus className="h-4 w-4" />
+            新增工具
+          </Link>
+        )}
+      </div>
+
       <div className="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
       <Card className="p-0">
         <div className="border-b border-line/70 p-6">
@@ -391,6 +418,15 @@ export function AdminToolsManager({
         ) : (
           <div className="px-6 py-12 text-center text-sm text-foreground/60">
             没有匹配的工具。
+            {!isReadonly ? (
+              <Link
+                href="/admin/tools/new"
+                className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/92"
+              >
+                <Plus className="h-4 w-4" />
+                去新增工具
+              </Link>
+            ) : null}
           </div>
         )}
       </Card>
@@ -725,8 +761,17 @@ export function AdminToolsManager({
             <p className="eyebrow">Tool Editor</p>
             <h2 className="mt-3 font-display text-3xl font-semibold text-foreground">暂无工具数据</h2>
             <p className="mt-4 max-w-md text-sm leading-7 text-foreground/64">
-              当前数据库里没有可编辑的工具，或者搜索条件没有匹配结果。
+              当前数据库里没有可编辑的工具，或者搜索条件没有匹配结果。你可以新建一个工具后再回来编辑。
             </p>
+            {!isReadonly ? (
+              <Link
+                href="/admin/tools/new"
+                className="mt-5 inline-flex h-11 items-center justify-center gap-2 rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/92"
+              >
+                <Plus className="h-4 w-4" />
+                新增工具
+              </Link>
+            ) : null}
           </div>
         </Card>
       )}
