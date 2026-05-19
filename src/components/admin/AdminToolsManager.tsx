@@ -4,8 +4,10 @@ import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Archive,
   ExternalLink,
   Eye,
+  FileJson,
   MousePointerClick,
   Plus,
   RefreshCw,
@@ -13,7 +15,8 @@ import {
   Search,
   Settings2,
   ShieldAlert,
-  Sparkles
+  Sparkles,
+  Trash2
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/Badge";
@@ -156,6 +159,7 @@ export function AdminToolsManager({
   const [formState, setFormState] = useState<ToolFormState>(mapToolToForm(tools[0] ?? null));
   const [isSaving, setIsSaving] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [feedback, setFeedback] = useState<string | null>(null);
 
@@ -200,7 +204,24 @@ export function AdminToolsManager({
     }));
   };
 
-  const handleSave = async () => {
+  const buildToolPayload = (status = formState.status) => ({
+    name: formState.name,
+    slug: formState.slug,
+    websiteUrl: formState.websiteUrl,
+    logoUrl: formState.logoUrl || "",
+    description: formState.description,
+    detailedIntro: formState.detailedIntro || "",
+    categoryId: formState.categoryId || null,
+    priceModel: formState.priceModel || null,
+    apiAvailable: formState.apiAvailable,
+    status,
+    isSponsored: formState.isSponsored,
+    sponsorPlan: formState.isSponsored ? formState.sponsorPlan || null : null,
+    tags: splitCommaValues(formState.tagsText),
+    features: splitLineValues(formState.featuresText)
+  });
+
+  const handleSave = async (nextStatus = formState.status) => {
     if (!selectedTool || isReadonly) {
       return;
     }
@@ -215,22 +236,7 @@ export function AdminToolsManager({
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({
-          name: formState.name,
-          slug: formState.slug,
-          websiteUrl: formState.websiteUrl,
-          logoUrl: formState.logoUrl || "",
-          description: formState.description,
-          detailedIntro: formState.detailedIntro || "",
-          categoryId: formState.categoryId || null,
-          priceModel: formState.priceModel || null,
-          apiAvailable: formState.apiAvailable,
-          status: formState.status,
-          isSponsored: formState.isSponsored,
-          sponsorPlan: formState.isSponsored ? formState.sponsorPlan || null : null,
-          tags: splitCommaValues(formState.tagsText),
-          features: splitLineValues(formState.featuresText)
-        })
+        body: JSON.stringify(buildToolPayload(nextStatus))
       });
 
       const payload = (await response.json().catch(() => null)) as {
@@ -242,12 +248,53 @@ export function AdminToolsManager({
         throw new Error(payload?.error ?? "保存失败");
       }
 
-      setFeedback(payload?.message ?? "已保存");
+      setFeedback(nextStatus === "archived" ? "工具已归档" : payload?.message ?? "已保存");
+      setFormState((current) => ({ ...current, status: nextStatus }));
       router.refresh();
     } catch (saveError) {
       setError(saveError instanceof Error ? saveError.message : "保存失败");
     } finally {
       setIsSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedTool || isReadonly) {
+      return;
+    }
+
+    const shouldDelete = window.confirm(
+      `确认永久删除「${selectedTool.name}」？删除后无法恢复，相关文章关联会自动移除。`
+    );
+
+    if (!shouldDelete) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+    setFeedback(null);
+
+    try {
+      const response = await fetch(`/api/admin/tools/${selectedTool.id}`, {
+        method: "DELETE"
+      });
+      const payload = (await response.json().catch(() => null)) as {
+        error?: string;
+        message?: string;
+      } | null;
+
+      if (!response.ok) {
+        throw new Error(payload?.error ?? "删除失败");
+      }
+
+      setFeedback(payload?.message ?? "工具已删除");
+      setSelectedId(null);
+      router.refresh();
+    } catch (deleteError) {
+      setError(deleteError instanceof Error ? deleteError.message : "删除失败");
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -325,13 +372,22 @@ export function AdminToolsManager({
             只读模式
           </span>
         ) : (
-          <Link
-            href="/admin/tools/new"
-            className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
-          >
-            <Plus className="h-4 w-4" />
-            新增工具
-          </Link>
+          <div className="flex flex-wrap gap-3">
+            <Link
+              href="/admin/tools/import"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full border border-line/80 bg-white/90 px-6 text-sm font-semibold text-foreground transition hover:border-brand/35 hover:text-brand"
+            >
+              <FileJson className="h-4 w-4" />
+              批量导入
+            </Link>
+            <Link
+              href="/admin/tools/new"
+              className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-foreground px-6 text-sm font-semibold text-white transition hover:bg-foreground/92"
+            >
+              <Plus className="h-4 w-4" />
+              新增工具
+            </Link>
+          </div>
         )}
       </div>
 
@@ -731,6 +787,18 @@ export function AdminToolsManager({
                 保存修改
               </Button>
             ) : null}
+            {!isReadonly && formState.status !== "archived" ? (
+              <Button
+                type="button"
+                size="lg"
+                variant="outline"
+                loading={isSaving}
+                leftIcon={<Archive className="h-4 w-4" />}
+                onClick={() => void handleSave("archived")}
+              >
+                归档工具
+              </Button>
+            ) : null}
             {!isReadonly ? (
               <Button
                 type="button"
@@ -751,6 +819,19 @@ export function AdminToolsManager({
                 onClick={() => updateField("isSponsored", false)}
               >
                 取消赞助
+              </Button>
+            ) : null}
+            {!isReadonly ? (
+              <Button
+                type="button"
+                size="lg"
+                variant="ghost"
+                loading={isDeleting}
+                leftIcon={<Trash2 className="h-4 w-4" />}
+                className="text-red-500 hover:bg-red-50 hover:text-red-600"
+                onClick={() => void handleDelete()}
+              >
+                删除工具
               </Button>
             ) : null}
           </div>

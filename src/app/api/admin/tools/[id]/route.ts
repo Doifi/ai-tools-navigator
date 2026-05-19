@@ -5,6 +5,17 @@ import { z } from "zod";
 import { ensureAdminRequest } from "@/lib/admin-route";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 
+function revalidateToolPaths(slug?: string) {
+  revalidatePath("/");
+  revalidatePath("/tools");
+  revalidatePath("/categories");
+  revalidatePath("/admin/tools");
+
+  if (slug) {
+    revalidatePath(`/tools/${slug}`);
+  }
+}
+
 const toolUpdateSchema = z.object({
   name: z.string().trim().min(2, "工具名称至少 2 个字符").max(200, "工具名称不能超过 200 个字符"),
   slug: z.string().trim().min(2, "Slug 至少 2 个字符").max(200, "Slug 不能超过 200 个字符"),
@@ -50,7 +61,7 @@ export async function PATCH(
 
     const { data: existingTool, error: existingToolError } = await supabase
       .from("tools")
-      .select("id")
+      .select("id, slug, published_at")
       .eq("id", params.id)
       .maybeSingle();
 
@@ -92,6 +103,10 @@ export async function PATCH(
         is_sponsored: validatedData.isSponsored,
         sponsor_plan: validatedData.isSponsored ? validatedData.sponsorPlan : null,
         status: validatedData.status,
+        published_at:
+          validatedData.status === "published"
+            ? existingTool.published_at ?? new Date().toISOString()
+            : null,
         tags: validatedData.tags ?? [],
         features: validatedData.features ?? [],
         updated_at: new Date().toISOString()
@@ -102,7 +117,8 @@ export async function PATCH(
       return NextResponse.json({ error: updateError.message }, { status: 500 });
     }
 
-    revalidatePath("/admin/tools");
+    revalidateToolPaths(existingTool.slug);
+    revalidateToolPaths(validatedData.slug);
 
     return NextResponse.json({
       success: true,
@@ -118,5 +134,74 @@ export async function PATCH(
 
     console.error("Update tool error:", error);
     return NextResponse.json({ error: "更新工具失败" }, { status: 500 });
+  }
+}
+
+/**
+ * DELETE /api/admin/tools/[id]
+ * Permanently removes a tool from the live catalog.
+ */
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  const unauthorizedResponse = await ensureAdminRequest();
+
+  if (unauthorizedResponse) {
+    return unauthorizedResponse;
+  }
+
+  try {
+    const supabase = createAdminSupabaseClient();
+
+    const { data: existingTool, error: existingToolError } = await supabase
+      .from("tools")
+      .select("id, slug, name")
+      .eq("id", params.id)
+      .maybeSingle();
+
+    if (existingToolError) {
+      return NextResponse.json({ error: existingToolError.message }, { status: 500 });
+    }
+
+    if (!existingTool) {
+      return NextResponse.json({ error: "工具不存在" }, { status: 404 });
+    }
+
+    const { data: relatedPosts, error: relatedPostsError } = await supabase
+      .from("posts")
+      .select("id, related_tools")
+      .contains("related_tools", [params.id]);
+
+    if (relatedPostsError) {
+      return NextResponse.json({ error: relatedPostsError.message }, { status: 500 });
+    }
+
+    for (const post of relatedPosts ?? []) {
+      const nextRelatedTools = (post.related_tools ?? []).filter((toolId) => toolId !== params.id);
+      const { error: updatePostError } = await supabase
+        .from("posts")
+        .update({ related_tools: nextRelatedTools })
+        .eq("id", post.id);
+
+      if (updatePostError) {
+        return NextResponse.json({ error: updatePostError.message }, { status: 500 });
+      }
+    }
+
+    const { error: deleteError } = await supabase.from("tools").delete().eq("id", params.id);
+
+    if (deleteError) {
+      return NextResponse.json({ error: deleteError.message }, { status: 500 });
+    }
+
+    revalidateToolPaths(existingTool.slug);
+    revalidatePath("/posts");
+    revalidatePath("/admin/posts");
+
+    return NextResponse.json({
+      success: true,
+      message: `工具「${existingTool.name}」已删除`
+    });
+  } catch (error) {
+    console.error("Delete tool error:", error);
+    return NextResponse.json({ error: "删除工具失败" }, { status: 500 });
   }
 }
