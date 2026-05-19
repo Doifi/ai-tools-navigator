@@ -1,12 +1,20 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Eye, Mail, Newspaper, Sparkles } from "lucide-react";
 
 import { Container } from "@/components/layout/Container";
+import { createPageMetadata } from "@/lib/seo";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = createPageMetadata({
+  title: "AI 工具教程与资讯",
+  description: "围绕真实工作流整理 AI 工具教程、OpenClaw 使用指南、产品对比、选型建议和实操经验。",
+  path: "/posts",
+  keywords: ["AI 工具教程", "AI 资讯", "OpenClaw 教程", "AI 工具对比", "AI 工作流"]
+});
 
 interface PostsPageProps {
   searchParams?: {

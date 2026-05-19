@@ -17,11 +17,14 @@ import { Container } from "@/components/layout/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getLobsterDownloadHref, lobsterTutorialPosts, lobsterZone } from "@/lib/lobster";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "OpenClaw（龙虾）专区 | AI Tools Navigator",
-  description: "基于 OpenClaw 官方主页、官方文档、官方 FAQ 与 GitHub 仓库整理的真实资料专区。"
-};
+export const metadata: Metadata = createPageMetadata({
+  title: "OpenClaw（龙虾）专区",
+  description: "基于 OpenClaw 官方主页、官方文档、官方 FAQ 与 GitHub 仓库整理的安装入口、安装教程和使用指南。",
+  path: "/lobster",
+  keywords: ["OpenClaw", "龙虾", "OpenClaw 安装", "OpenClaw 教程", "ClawHub"]
+});
 
 const iconMap = {
   downloads: Download,

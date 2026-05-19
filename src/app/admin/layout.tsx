@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { Activity, FolderTree, LayoutDashboard, Newspaper, Wrench } from "lucide-react";
@@ -8,6 +9,13 @@ import { AdminLogoutButton } from "@/components/admin/AdminLogoutButton";
 import { ADMIN_SESSION_COOKIE, verifyAdminSession } from "@/lib/admin-auth";
 
 export const dynamic = "force-dynamic";
+export const metadata: Metadata = {
+  title: "后台管理",
+  robots: {
+    index: false,
+    follow: false
+  }
+};
 
 interface AdminLayoutProps {
   children: ReactNode;

@@ -1,9 +1,12 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, CalendarDays, Eye, Link2, UserRound } from "lucide-react";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/Container";
 import { PostMarkdownContent } from "@/components/posts/PostMarkdownContent";
+import { getMockApiPostBySlug } from "@/lib/mock/api-fallback";
+import { createPageMetadata } from "@/lib/seo";
 import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -14,6 +17,43 @@ interface PostDetailPageProps {
   params: {
     slug: string;
   };
+}
+
+export async function generateMetadata({ params }: PostDetailPageProps): Promise<Metadata> {
+  if (hasPublicSupabaseEnv() || hasAdminSupabaseEnv()) {
+    try {
+      const supabase = hasPublicSupabaseEnv()
+        ? createServerSupabaseClient()
+        : createAdminSupabaseClient();
+      const { data: post } = await supabase
+        .from("posts")
+        .select("title, slug, excerpt, cover_image, author, published_at, categories(name, slug)")
+        .eq("slug", params.slug)
+        .eq("status", "published")
+        .maybeSingle();
+
+      if (post) {
+        return createPageMetadata({
+          title: post.title,
+          description: post.excerpt ?? `${post.title}，AI Tools Navigator 站内教程与资讯。`,
+          path: `/posts/${post.slug}`,
+          keywords: [post.title, post.categories?.name ?? "AI 教程", post.author ?? "AI Tools Navigator"],
+          image: post.cover_image
+        });
+      }
+    } catch (error) {
+      console.error("Post metadata generation failed:", error);
+    }
+  }
+
+  const fallbackPost = getMockApiPostBySlug(params.slug);
+
+  return createPageMetadata({
+    title: fallbackPost?.title ?? "AI 工具教程",
+    description: fallbackPost?.excerpt ?? "阅读 AI 工具教程、产品对比、选型建议和实操经验。",
+    path: `/posts/${params.slug}`,
+    keywords: [fallbackPost?.title ?? "AI 工具教程", fallbackPost?.categories?.name ?? "AI 教程"]
+  });
 }
 
 export default async function PostDetailPage({ params }: PostDetailPageProps) {
