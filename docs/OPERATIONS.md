@@ -8,6 +8,7 @@
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - `SUPABASE_SERVICE_ROLE_KEY`
 - `ADMIN_PASSWORD`
+- `NEXT_PUBLIC_SITE_URL`
 
 补充说明：
 
@@ -32,9 +33,27 @@
 
 - Vercel 项目：`doifi's projects / ai-tools-navigator`
 - 项目 ID：`prj_cC4fm6pCP80mzfM5s6A8w8PiEavv`
+- 正式域名：`https://aiworknav.cn`
+- `www` 域名：`https://www.aiworknav.cn`
 - 稳定线上地址：`https://ai-tools-navigator-doifis-projects.vercel.app`
 - 备用线上别名：`https://ai-tools-navigator-navy.vercel.app`
 - Git 主分支别名：`https://ai-tools-navigator-git-main-doifis-projects.vercel.app`
+
+### 正式域名 DNS 记录
+
+域名购买平台：阿里云。
+
+Vercel 已绑定：
+
+- `aiworknav.cn`
+- `www.aiworknav.cn`
+
+阿里云 DNS 解析建议：
+
+- 主机记录：`@`，记录类型：`A`，记录值：`76.76.21.21`
+- 主机记录：`www`，记录类型：`A`，记录值：`76.76.21.21`
+
+如果阿里云已有 `@` 或 `www` 的旧 A 记录，需要先删除或改成以上值。
 
 ### 后台入口记录
 
