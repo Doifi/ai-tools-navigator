@@ -17,7 +17,7 @@ export const SITE_KEYWORDS = [
   "AI 编程"
 ];
 
-const DEFAULT_SITE_URL = "https://ai-tools-navigator-navy.vercel.app";
+const DEFAULT_SITE_URL = "https://aiworknav.cn";
 
 export function getSiteUrl() {
   const rawUrl =
@@ -32,6 +32,41 @@ export function getSiteUrl() {
 export function absoluteUrl(path = "/") {
   const normalizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${getSiteUrl()}${normalizedPath}`;
+}
+
+export function stringifyJsonLd(data: unknown) {
+  return JSON.stringify(data).replace(/</g, "\\u003c");
+}
+
+export function createSiteJsonLd() {
+  const siteUrl = getSiteUrl();
+
+  return [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "@id": `${siteUrl}/#website`,
+      name: SITE_NAME,
+      alternateName: ["AI 工具导航", "AI导航网站", "AI Tools Navigator"],
+      url: siteUrl,
+      description: SITE_DESCRIPTION,
+      inLanguage: "zh-CN",
+      potentialAction: {
+        "@type": "SearchAction",
+        target: `${siteUrl}/tools?q={search_term_string}`,
+        "query-input": "required name=search_term_string"
+      }
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "@id": `${siteUrl}/#organization`,
+      name: SITE_NAME,
+      url: siteUrl,
+      logo: absoluteUrl("/icon.svg"),
+      description: SITE_DESCRIPTION
+    }
+  ];
 }
 
 export function createPageMetadata({

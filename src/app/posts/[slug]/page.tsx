@@ -6,7 +6,7 @@ import { notFound } from "next/navigation";
 import { Container } from "@/components/layout/Container";
 import { PostMarkdownContent } from "@/components/posts/PostMarkdownContent";
 import { getMockApiPostBySlug } from "@/lib/mock/api-fallback";
-import { createPageMetadata } from "@/lib/seo";
+import { SITE_NAME, absoluteUrl, createPageMetadata, stringifyJsonLd } from "@/lib/seo";
 import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -79,6 +79,27 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
   const relatedToolIds = Array.isArray(post.related_tools) ? post.related_tools : [];
   const categoryId = post.category_id;
   const publishedAt = post.published_at;
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    mainEntityOfPage: absoluteUrl(`/posts/${post.slug}`),
+    headline: post.title,
+    description: post.excerpt ?? `${post.title}，AI Tools Navigator 站内教程与资讯。`,
+    image: post.cover_image ? [post.cover_image] : undefined,
+    author: {
+      "@type": "Person",
+      name: post.author ?? SITE_NAME
+    },
+    publisher: {
+      "@type": "Organization",
+      name: SITE_NAME,
+      url: absoluteUrl("/")
+    },
+    datePublished: post.published_at ?? undefined,
+    dateModified: post.published_at ?? undefined,
+    articleSection: post.categories?.name ?? "AI 工具教程",
+    inLanguage: "zh-CN"
+  };
 
   const [{ data: relatedTools }, { data: relatedPosts }, { data: previousPost }, { data: nextPost }] =
     await Promise.all([
@@ -259,6 +280,10 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
           <div className="surface-panel p-5 text-sm text-foreground/42">没有更新的文章</div>
         )}
       </nav>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: stringifyJsonLd(articleJsonLd) }}
+      />
     </Container>
   );
 }

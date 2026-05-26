@@ -5,7 +5,15 @@ import "@/app/globals.css";
 import { BottomRefresh } from "@/components/layout/BottomRefresh";
 import { Footer } from "@/components/layout/Footer";
 import { Header } from "@/components/layout/Header";
-import { SITE_DESCRIPTION, SITE_KEYWORDS, SITE_NAME, SITE_TITLE, getSiteUrl } from "@/lib/seo";
+import {
+  SITE_DESCRIPTION,
+  SITE_KEYWORDS,
+  SITE_NAME,
+  SITE_TITLE,
+  createSiteJsonLd,
+  getSiteUrl,
+  stringifyJsonLd
+} from "@/lib/seo";
 
 export const metadata: Metadata = {
   metadataBase: new URL(getSiteUrl()),
@@ -61,6 +69,10 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <Footer />
         <BottomRefresh />
         <Analytics />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: stringifyJsonLd(createSiteJsonLd()) }}
+        />
       </body>
     </html>
   );
