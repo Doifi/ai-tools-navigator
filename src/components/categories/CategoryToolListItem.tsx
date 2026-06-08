@@ -4,6 +4,7 @@ import { ArrowUpRight, Eye, MousePointerClick, Sparkles, Star } from "lucide-rea
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getIcon } from "@/lib/mock/icon-map";
+import { getToolPath } from "@/lib/tool-routes";
 import type { MockTool } from "@/lib/mock";
 import { formatDate } from "@/lib/utils";
 
@@ -73,7 +74,7 @@ export function CategoryToolListItem({ tool }: CategoryToolListItemProps) {
 
       <div className="flex w-full shrink-0 flex-col gap-3 lg:w-auto lg:min-w-[180px]">
         <Link
-          href={`/tools/${tool.id}`}
+          href={getToolPath(tool)}
           className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/90"
         >
           查看详情

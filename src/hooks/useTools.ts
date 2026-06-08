@@ -18,9 +18,10 @@ interface UseToolsOptions {
   priceModel?: Enums<"price_model"> | null;
   apiAvailable?: boolean | null;
   enabled?: boolean;
+  fallbackData?: ToolsResponse;
 }
 
-interface ToolsResponse {
+export interface ToolsResponse {
   tools: ApiTool[];
   pagination: {
     page: number;
@@ -93,7 +94,8 @@ export function useTools(options: UseToolsOptions = {}) {
   ]);
 
   const { data, error, isLoading, isValidating, mutate } = useSWR<ToolsResponse>(key, fetcher, {
-    keepPreviousData: true
+    keepPreviousData: true,
+    fallbackData: options.fallbackData
   });
 
   return {

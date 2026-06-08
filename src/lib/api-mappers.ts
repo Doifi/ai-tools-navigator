@@ -137,6 +137,7 @@ export function mapApiCategoryToCard(category: ApiCategory): Category {
 export function mapApiToolToCard(tool: ApiTool): Tool {
   return {
     id: tool.id,
+    slug: tool.slug,
     name: tool.name,
     tagline: tool.categories?.name ? `${tool.categories.name} 工具` : "AI 工具",
     description: tool.description ?? "暂无工具介绍",

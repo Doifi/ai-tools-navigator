@@ -9,12 +9,19 @@ import { Card } from "@/components/ui/Card";
 import { CategoryCard } from "@/components/ui/CategoryCard";
 import { mapApiCategoryToCard } from "@/lib/api-mappers";
 import { useCategories } from "@/hooks/useCategories";
+import type { CategoriesResponse } from "@/hooks/useCategories";
 
 /**
  * Dedicated categories index page.
  */
-export function CategoriesIndexPageClient() {
-  const { categories, isLoading, error, mutate } = useCategories();
+interface CategoriesIndexPageClientProps {
+  initialCategories?: CategoriesResponse;
+}
+
+export function CategoriesIndexPageClient({ initialCategories }: CategoriesIndexPageClientProps) {
+  const { categories, isLoading, error, mutate } = useCategories({
+    fallbackData: initialCategories
+  });
 
   const categoryCards = categories.map(mapApiCategoryToCard);
   const totalTools = categories.reduce((sum, category) => sum + (category.toolCount ?? 0), 0);

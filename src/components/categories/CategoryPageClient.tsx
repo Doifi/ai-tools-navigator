@@ -16,10 +16,13 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { ToolCard } from "@/components/ui/ToolCard";
 import { getIcon } from "@/lib/mock/icon-map";
+import { getToolPath } from "@/lib/tool-routes";
 import { cn, formatDate } from "@/lib/utils";
 import { getCategoryPresentation, mapApiCategoryToCard, mapApiToolToCard } from "@/lib/api-mappers";
 import { useCategories } from "@/hooks/useCategories";
 import { useTools } from "@/hooks/useTools";
+import type { CategoriesResponse } from "@/hooks/useCategories";
+import type { ToolsResponse } from "@/hooks/useTools";
 import type { Enums } from "@/types/supabase";
 
 const PAGE_SIZE = 12;
@@ -105,7 +108,7 @@ function CategoryToolRow({ tool }: { tool: ReturnType<typeof mapApiToolToCard> }
 
       <div className="flex w-full shrink-0 flex-col gap-3 lg:w-auto lg:min-w-[180px]">
         <Link
-          href={`/tools/${tool.id}`}
+          href={getToolPath(tool)}
           className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/90"
         >
           查看详情
@@ -124,7 +127,13 @@ function CategoryToolRow({ tool }: { tool: ReturnType<typeof mapApiToolToCard> }
   );
 }
 
-export function CategoryPageClient({ slug }: { slug: string }) {
+interface CategoryPageClientProps {
+  slug: string;
+  initialCategories?: CategoriesResponse;
+  initialTools?: ToolsResponse;
+}
+
+export function CategoryPageClient({ slug, initialCategories, initialTools }: CategoryPageClientProps) {
   const [activeFilter, setActiveFilter] = useState<CategoryFilterValue>("all");
   const [activeSort, setActiveSort] = useState<CategorySortValue>("latest");
   const [viewMode, setViewMode] = useState<CategoryViewMode>("grid");
@@ -135,7 +144,9 @@ export function CategoryPageClient({ slug }: { slug: string }) {
     isLoading: categoriesLoading,
     error: categoriesError,
     mutate: reloadCategories
-  } = useCategories();
+  } = useCategories({
+    fallbackData: initialCategories
+  });
 
   const category = useMemo(() => categories.find((item) => item.slug === slug), [categories, slug]);
   const categoryCard = useMemo(() => (category ? mapApiCategoryToCard(category) : null), [category]);
@@ -154,7 +165,8 @@ export function CategoryPageClient({ slug }: { slug: string }) {
     sort: toApiSort(activeSort),
     priceModel: toPriceFilter(activeFilter),
     apiAvailable: activeFilter === "api" ? true : null,
-    enabled: Boolean(category?.id)
+    enabled: Boolean(category?.id),
+    fallbackData: initialTools
   });
 
   useEffect(() => {

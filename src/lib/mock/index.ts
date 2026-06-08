@@ -104,6 +104,7 @@ export interface MockPostCategory {
 
 export interface ToolCardData {
   id: string;
+  slug?: string;
   name: string;
   tagline: string;
   description: string;
@@ -954,6 +955,7 @@ export function getCategoryTheme(slug: string) {
 export function mapMockToolToCard(tool: MockTool): ToolCardData {
   return {
     id: tool.id,
+    slug: tool.id,
     name: tool.name,
     tagline: tool.tagline,
     description: tool.description,

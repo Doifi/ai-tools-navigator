@@ -4,6 +4,7 @@ import { ArrowUpRight, Bookmark, Eye, MousePointerClick, Star } from "lucide-rea
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { getIcon } from "@/lib/mock/icon-map";
+import { getToolPath } from "@/lib/tool-routes";
 import type { Tool } from "@/lib/mock/data";
 import { formatDate } from "@/lib/utils";
 
@@ -82,7 +83,7 @@ export function ToolCard({ tool }: ToolCardProps) {
 
       <div className="mt-auto flex flex-col gap-3 sm:flex-row">
         <Link
-          href={`/tools/${tool.id}`}
+          href={getToolPath(tool)}
           className="inline-flex h-11 flex-1 items-center justify-center rounded-full bg-foreground text-sm font-semibold text-white transition hover:bg-foreground/90"
         >
           查看详情

@@ -10,6 +10,7 @@ import { SITE_NAME, absoluteUrl, createPageMetadata, stringifyJsonLd } from "@/l
 import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getToolPath } from "@/lib/tool-routes";
 
 export const dynamic = "force-dynamic";
 
@@ -217,7 +218,7 @@ export default async function PostDetailPage({ params }: PostDetailPageProps) {
                 {(relatedTools ?? []).map((tool) => (
                   <Link
                     key={tool.id}
-                    href={`/tools/${tool.id}`}
+                    href={getToolPath(tool)}
                     className="block rounded-2xl border border-line/70 bg-white px-4 py-4 transition hover:border-brand/40"
                   >
                     <p className="font-semibold text-foreground">{tool.name}</p>

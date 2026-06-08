@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { getMockCategoryBySlug, mockPostCategories, popularMockTools } from "@/lib/mock";
+import { getToolPath } from "@/lib/tool-routes";
 
 interface PostsSidebarProps {
   className?: string;
@@ -48,7 +49,7 @@ export function PostsSidebar({ className }: PostsSidebarProps) {
               return (
                 <Link
                   key={tool.id}
-                  href={`/tools/${tool.id}`}
+                  href={getToolPath(tool)}
                   className="block rounded-[1.25rem] border border-line/70 bg-background/85 p-4 transition hover:border-brand/30 hover:bg-white"
                 >
                   <div className="flex items-center justify-between gap-3">

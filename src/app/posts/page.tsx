@@ -7,6 +7,7 @@ import { createPageMetadata } from "@/lib/seo";
 import { createAdminSupabaseClient } from "@/lib/supabase/admin";
 import { hasAdminSupabaseEnv, hasPublicSupabaseEnv } from "@/lib/supabase/env";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getToolPath } from "@/lib/tool-routes";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = createPageMetadata({
@@ -227,7 +228,7 @@ export default async function PostsPage({ searchParams }: PostsPageProps) {
               {(recommendedTools ?? []).map((tool) => (
                 <Link
                   key={tool.id}
-                  href={`/tools/${tool.id}`}
+                  href={getToolPath(tool)}
                   className="block rounded-2xl border border-line/70 bg-white px-4 py-4 transition hover:border-brand/40"
                 >
                   <p className="font-semibold text-foreground">{tool.name}</p>

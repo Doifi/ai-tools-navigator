@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { permanentRedirect } from "next/navigation";
 
 import { ToolPageClient } from "@/components/tools/ToolPageClient";
 import { getOfficialApiToolById } from "@/lib/official-tools-sync";
@@ -15,6 +16,30 @@ function isUuid(value: string) {
   return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
     value
   );
+}
+
+async function getCanonicalToolSlug(identifier: string) {
+  if (hasReadableSupabaseEnv()) {
+    try {
+      const supabase = createReadableSupabaseClient();
+      let query = supabase
+        .from("tools")
+        .select("slug")
+        .eq("status", "published");
+
+      query = isUuid(identifier) ? query.eq("id", identifier) : query.eq("slug", identifier);
+
+      const { data: tool } = await query.maybeSingle();
+
+      if (tool?.slug) {
+        return tool.slug;
+      }
+    } catch (error) {
+      console.error("Tool canonical slug lookup failed:", error);
+    }
+  }
+
+  return getOfficialApiToolById(identifier)?.slug ?? null;
 }
 
 export async function generateMetadata({ params }: ToolPageProps): Promise<Metadata> {
@@ -69,6 +94,13 @@ export async function generateMetadata({ params }: ToolPageProps): Promise<Metad
   });
 }
 
-export default function ToolPage({ params }: ToolPageProps) {
-  return <ToolPageClient id={params.id} />;
+export default async function ToolPage({ params }: ToolPageProps) {
+  const identifier = params.id.trim();
+  const canonicalSlug = await getCanonicalToolSlug(identifier);
+
+  if (canonicalSlug && canonicalSlug !== identifier) {
+    permanentRedirect(`/tools/${canonicalSlug}`);
+  }
+
+  return <ToolPageClient id={identifier} />;
 }

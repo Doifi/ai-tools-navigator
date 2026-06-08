@@ -1,8 +1,11 @@
 import Link from "next/link";
 import { Fragment, ReactNode } from "react";
 
+import { getToolPath } from "@/lib/tool-routes";
+
 interface RelatedToolSummary {
   id: string;
+  slug?: string | null;
   name: string;
 }
 
@@ -27,7 +30,7 @@ function renderInline(content: string, relatedTools: RelatedToolSummary[]) {
         return (
           <Link
             key={`${toolName}-${index}`}
-            href={`/tools/${linkedTool.id}`}
+            href={getToolPath(linkedTool)}
             className="rounded-full bg-brand/10 px-2 py-1 font-semibold text-brand transition hover:bg-brand/15"
           >
             {linkedTool.name}

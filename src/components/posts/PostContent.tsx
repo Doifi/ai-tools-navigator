@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import type { MockPostContentBlock, MockTool } from "@/lib/mock";
+import { getToolPath } from "@/lib/tool-routes";
 
 interface PostContentProps {
   blocks: MockPostContentBlock[];
@@ -31,7 +32,7 @@ function renderTextWithMentions(text: string, tools: MockTool[]): ReactNode {
     return (
       <Link
         key={`${matchedTool.id}-${index}`}
-        href={`/tools/${matchedTool.id}`}
+        href={getToolPath(matchedTool)}
         className="inline-flex rounded-full bg-brand/10 px-2 py-0.5 text-sm font-semibold text-brand transition hover:bg-brand hover:text-white"
       >
         {matchedTool.name}

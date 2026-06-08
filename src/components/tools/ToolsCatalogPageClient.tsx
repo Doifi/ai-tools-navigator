@@ -20,9 +20,12 @@ import { SearchBar } from "@/components/ui/SearchBar";
 import { ToolCard } from "@/components/ui/ToolCard";
 import { mapApiCategoryToCard, mapApiToolToCard } from "@/lib/api-mappers";
 import { getIcon } from "@/lib/mock/icon-map";
+import { getToolPath } from "@/lib/tool-routes";
 import { cn, formatDate } from "@/lib/utils";
 import { useCategories } from "@/hooks/useCategories";
 import { useTools } from "@/hooks/useTools";
+import type { CategoriesResponse } from "@/hooks/useCategories";
+import type { ToolsResponse } from "@/hooks/useTools";
 import type { Enums } from "@/types/supabase";
 
 const PAGE_SIZE = 12;
@@ -109,7 +112,7 @@ function ToolListRow({ tool }: { tool: ReturnType<typeof mapApiToolToCard> }) {
 
       <div className="flex w-full shrink-0 flex-col gap-3 lg:w-auto lg:min-w-[180px]">
         <Link
-          href={`/tools/${tool.id}`}
+          href={getToolPath(tool)}
           className="inline-flex h-11 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-white transition hover:bg-foreground/90"
         >
           查看详情
@@ -132,6 +135,8 @@ interface ToolsCatalogPageClientProps {
   initialSort?: CategorySortValue;
   initialQuery?: string;
   initialMarket?: ToolMarketValue;
+  initialCategories?: CategoriesResponse;
+  initialTools?: ToolsResponse;
 }
 
 /**
@@ -140,7 +145,9 @@ interface ToolsCatalogPageClientProps {
 export function ToolsCatalogPageClient({
   initialSort = "hot",
   initialQuery = "",
-  initialMarket = "all"
+  initialMarket = "all",
+  initialCategories,
+  initialTools
 }: ToolsCatalogPageClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -159,7 +166,9 @@ export function ToolsCatalogPageClient({
     isLoading: categoriesLoading,
     error: categoriesError,
     mutate: reloadCategories
-  } = useCategories();
+  } = useCategories({
+    fallbackData: initialCategories
+  });
 
   const activeCategory = categories.find((item) => item.slug === activeCategorySlug);
 
@@ -177,7 +186,8 @@ export function ToolsCatalogPageClient({
     query,
     sort: toApiSort(activeSort),
     priceModel: toPriceFilter(activeFilter),
-    apiAvailable: activeFilter === "api" ? true : null
+    apiAvailable: activeFilter === "api" ? true : null,
+    fallbackData: initialTools
   });
 
   useEffect(() => {

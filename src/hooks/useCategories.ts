@@ -3,14 +3,21 @@ import useSWR from "swr";
 import type { ApiCategory } from "@/lib/api-mappers";
 import { fetcher } from "@/lib/fetcher";
 
-interface CategoriesResponse {
+export interface CategoriesResponse {
   categories: ApiCategory[];
 }
 
-export function useCategories() {
+interface UseCategoriesOptions {
+  fallbackData?: CategoriesResponse;
+}
+
+export function useCategories(options: UseCategoriesOptions = {}) {
   const { data, error, isLoading, isValidating, mutate } = useSWR<CategoriesResponse>(
     "/api/categories",
-    fetcher
+    fetcher,
+    {
+      fallbackData: options.fallbackData
+    }
   );
 
   return {

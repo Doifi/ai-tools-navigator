@@ -3,6 +3,7 @@ import { ArrowRight, Compass, Sparkles, TrendingUp } from "lucide-react";
 
 import { SearchBar } from "@/components/ui/SearchBar";
 import type { Category, Tool } from "@/lib/mock/data";
+import { getToolPath } from "@/lib/tool-routes";
 
 interface HomeHeroProps {
   toolCount: number;
@@ -117,7 +118,7 @@ export function HomeHero({
                     <p className="mt-1 text-sm text-foreground/58">{tool.tagline}</p>
                   </div>
                   <Link
-                    href={`/tools/${tool.id}`}
+                    href={getToolPath(tool)}
                     className="rounded-full border border-line/70 px-3 py-2 text-xs font-semibold text-foreground/65 transition hover:border-brand/30 hover:text-brand"
                   >
                     查看
@@ -145,4 +146,3 @@ export function HomeHero({
 }
 
 export default HomeHero;
-

@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
 import { CategoryPageClient } from "@/components/categories/CategoryPageClient";
+import { CatalogDiscoveryLinks } from "@/components/seo/CatalogDiscoveryLinks";
 import { getOfficialApiCategories } from "@/lib/official-tools-sync";
+import { getPublicCategories, PUBLIC_TOOLS_PAGE_SIZE, queryPublicTools } from "@/lib/public-catalog";
 import { resolveCategorySlugAlias } from "@/lib/routing/legacy";
 import { createPageMetadata } from "@/lib/seo";
 import { createReadableSupabaseClient, hasReadableSupabaseEnv } from "@/lib/supabase/read";
+
+export const dynamic = "force-dynamic";
 
 interface CategoryPageProps {
   params: {
@@ -52,12 +56,45 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   });
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
+export default async function CategoryPage({ params }: CategoryPageProps) {
   const resolvedSlug = resolveCategorySlugAlias(params.slug);
 
   if (resolvedSlug !== params.slug) {
     redirect(`/categories/${resolvedSlug}`);
   }
 
-  return <CategoryPageClient slug={resolvedSlug} />;
+  const categories = await getPublicCategories();
+  const category = categories.find((item) => item.slug === resolvedSlug);
+  const [tools, discoveryTools] = category
+    ? await Promise.all([
+        queryPublicTools({
+          page: 1,
+          limit: PUBLIC_TOOLS_PAGE_SIZE,
+          categoryId: category.id,
+          sort: "latest"
+        }),
+        queryPublicTools({
+          page: 1,
+          limit: 50,
+          categoryId: category.id,
+          sort: "popular"
+        })
+      ])
+    : [undefined, undefined];
+
+  return (
+    <>
+      <CategoryPageClient
+        slug={resolvedSlug}
+        initialCategories={{ categories }}
+        initialTools={tools}
+      />
+      <CatalogDiscoveryLinks
+        title={`${category?.name ?? "AI 工具分类"}工具入口`}
+        description="这些同类工具链接直接出现在分类页源码中，帮助搜索引擎理解分类和详情页之间的关系。"
+        categories={categories}
+        tools={discoveryTools?.tools ?? []}
+      />
+    </>
+  );
 }
