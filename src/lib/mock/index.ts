@@ -348,6 +348,26 @@ export const mockTools: MockTool[] = [
     clickCount: 36570
   },
   {
+    id: "roblox-gui-maker",
+    name: "Roblox GUI Maker",
+    tagline: "用提示词生成 Roblox Studio GUI 与 Lua 起步代码",
+    description: "适合设计 Roblox 菜单、HUD、商店、库存界面和移动端预览，并快速导出可继续调整的 Lua Starter Code。",
+    logo: "Code2",
+    category: "ai-coding",
+    tags: ["Roblox GUI", "Lua 代码", "游戏 UI"],
+    priceModel: "Free",
+    apiAvailable: false,
+    isSponsored: false,
+    website: "https://robloxguimaker.dev/",
+    developer: "Roblox GUI Maker",
+    launchedAt: "2026-06-01",
+    createdAt: "2026-06-18",
+    rating: 4.3,
+    saves: 6240,
+    viewCount: 58400,
+    clickCount: 12960
+  },
+  {
     id: "elevenlabs",
     name: "ElevenLabs",
     tagline: "高拟真语音合成与角色配音工具",
